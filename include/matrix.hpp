@@ -9,11 +9,14 @@
 #include <cstddef>   
 #include <stdexcept> 
 #include <iostream>
+#include <optional>
 
 class Matrix {
     public:
-        // rows x cols, all zeroes
+        // default constructor, all zeroes
         Matrix(size_t rows, size_t cols);
+        // constructor with specific inputs
+        Matrix (size_t rows, size_t cols, std::vector<double> ip);
 
         // Element access
         double operator()(size_t r, size_t c) const;    // reading
