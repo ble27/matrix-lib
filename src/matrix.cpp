@@ -40,13 +40,24 @@ double& Matrix::operator()(size_t r, size_t c) {
 Matrix Matrix::operator*(const Matrix& other) const {
     if (cols_ != other.rows_) 
         throw std::runtime_error("Invalid matrix multiplication due to row-column mismatch\n");
-
+        
     Matrix res(rows_, other.cols_);
     for (size_t i = 0; i < rows_; i++) {
         for (size_t j = 0; j < other.cols_; j++) {
             for (size_t k = 0; k < cols_; k++) {
                 res(i, j) += (*this)(i, k) * other(k, j);
             }
+        }
+    }
+    return res;
+}
+
+// Scalar multiplication
+Matrix Matrix::operator*(double factor) const {
+    Matrix res(rows(), cols());
+    for (size_t r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            res(r, c) = (*this)(r, c) * factor;
         }
     }
     return res;
@@ -65,7 +76,17 @@ Matrix Matrix::operator+(const Matrix& other) const {
     return res;
 }
 
-Matrix Matrix::operator+=(const Matrix& other) {}
+Matrix Matrix::operator+=(const Matrix& other) {
+    if ((*this).shape() != other.shape()) 
+        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
+
+     for (int r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            (*this)(r, c) = (*this)(r, c) + other(r, c);
+        }
+    }
+    return *this;
+}
 
 // Subtraction
 Matrix Matrix::operator-(const Matrix& other) const {
@@ -81,7 +102,16 @@ Matrix Matrix::operator-(const Matrix& other) const {
     return res;
 }
 
-Matrix Matrix::operator-=(const Matrix& other) {}
+Matrix Matrix::operator-=(const Matrix& other) {
+    if ((*this).shape() != other.shape()) 
+        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
+     for (int r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            (*this)(r, c) = (*this)(r, c) - other(r, c);
+        }
+    }
+    return *this;
+}
 
 // Matrix shape
 std::tuple<size_t, size_t> Matrix::shape() const {
