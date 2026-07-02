@@ -52,6 +52,32 @@ void test_multiply_default_constructor() {
     std::cout << "PASS test_multiply_default_constructor\n";
 }
 
+void test_addition_elementwise() {
+    Matrix a(2, 2);
+    Matrix b(2, 2);
+    a(0, 0) = 1.0; a(0, 1) = 2.0; a(1, 0) = 3.0; a(1, 1) = 4.0;
+    b(0, 0) = 1.0; b(0, 1) = 2.0; b(1, 0) = 3.0; b(1, 1) = 4.0;
+    Matrix c = a + b;
+    assert(approx_eq(c(0,0), 2.0));
+    assert(approx_eq(c(0,1), 4.0));
+    assert(approx_eq(c(1,0), 6.0));
+    assert(approx_eq(c(1,1), 8.0));
+    std::cout << "PASS test_addition_elementwise\n";
+}
+
+void test_subtraction_elementwise() {
+    Matrix a(2, 2);
+    Matrix b(2, 2);
+    a(0, 0) = 1.0; a(0, 1) = 7.0; a(1, 0) = 6.0; a(1, 1) = 9.0;
+    b(0, 0) = 2.0; b(0, 1) = 5.0; b(1, 0) = 3.0; b(1, 1) = 4.0;
+    Matrix c = a - b;
+    assert(approx_eq(c(0,0), -1.0));
+    assert(approx_eq(c(0,1), 2.0));
+    assert(approx_eq(c(1,0), 3.0));
+    assert(approx_eq(c(1,1), 5.0));
+    std::cout << "PASS test_subtraction_elementwise\n";
+}
+
 // void test_multiply() {
 //     // A = [[1, 2], [3, 4]]
 //     // B = [[5, 6], [7, 8]]
@@ -72,6 +98,8 @@ int main() {
     test_element_access();
     test_multiply_default_constructor();
     // test_multiply();
+    test_addition_elementwise();
+    test_subtraction_elementwise();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }

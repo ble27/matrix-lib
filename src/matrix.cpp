@@ -52,6 +52,42 @@ Matrix Matrix::operator*(const Matrix& other) const {
     return res;
 }
 
+Matrix Matrix::operator+(const Matrix& other) const {
+    if ((*this).shape() != other.shape()) 
+        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
+
+    Matrix res(rows_, cols_);
+    for (int r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            res(r, c) = (*this)(r, c) + other(r, c);
+        }
+    }
+    return res;
+}
+
+Matrix Matrix::operator+=(const Matrix& other) {}
+
+// Subtraction
+Matrix Matrix::operator-(const Matrix& other) const {
+    if ((*this).shape() != other.shape()) 
+        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
+
+    Matrix res(rows_, cols_);
+    for (int r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            res(r, c) = (*this)(r, c) - other(r, c);
+        }
+    }
+    return res;
+}
+
+Matrix Matrix::operator-=(const Matrix& other) {}
+
+// Matrix shape
+std::tuple<size_t, size_t> Matrix::shape() const {
+    return std::make_tuple(rows(), cols());
+}
+
 // Print
 void Matrix::print() const {
     std::cout << '\n';

@@ -10,14 +10,18 @@
 #include <stdexcept> 
 #include <iostream>
 #include <optional>
+#include <tuple>
 
 class Matrix {
     public:
         // default constructor, all zeroes
         Matrix(size_t rows, size_t cols);
         // constructor with specific inputs
-        Matrix (size_t rows, size_t cols, std::vector<double> ip);
+        Matrix(size_t rows, size_t cols, std::vector<double> ip);
 
+        // Matrix shape (rows, cols)
+        std::tuple<size_t, size_t> shape() const;
+        
         // Element access
         double operator()(size_t r, size_t c) const;    // reading
         double& operator()(size_t r, size_t c); // writing
@@ -28,6 +32,15 @@ class Matrix {
 
         // Matrix multiply - the core operation
         Matrix operator*(const Matrix& other) const;
+        Matrix operator*(double factor) const;
+
+        // Addition
+        Matrix operator+(const Matrix& other) const;
+        Matrix operator+=(const Matrix& other);
+
+        // Subtraction
+        Matrix operator-(const Matrix& other) const;
+        Matrix operator-=(const Matrix& other);
 
         // Print
         void print() const;
