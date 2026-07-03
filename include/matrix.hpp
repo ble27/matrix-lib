@@ -42,6 +42,17 @@ class Matrix {
         Matrix operator-(const Matrix& other) const;
         Matrix operator-=(const Matrix& other);
 
+        // Division
+        Matrix operator/(double scalar) const;
+
+        // Comparison
+        bool operator==(const Matrix& other) const;
+        bool operator!=(const Matrix& other) const;
+
+        // Structural
+        Matrix transpose() const;
+        Matrix slice(size_t r0, size_t r1, size_t c0, size_t c1) const;
+
         // Print
         void print() const;
 
