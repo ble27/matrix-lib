@@ -36,11 +36,11 @@ double& Matrix::operator()(size_t r, size_t c) {
     return data_[r * cols_ + c];    
 }
 
-// Matrix multiply 
+// Matrix multiplication
 Matrix Matrix::operator*(const Matrix& other) const {
     if (cols_ != other.rows_) 
         throw std::runtime_error("Invalid matrix multiplication due to row-column mismatch\n");
-        
+
     Matrix res(rows_, other.cols_);
     for (size_t i = 0; i < rows_; i++) {
         for (size_t j = 0; j < other.cols_; j++) {
@@ -52,17 +52,7 @@ Matrix Matrix::operator*(const Matrix& other) const {
     return res;
 }
 
-// Scalar multiplication
-Matrix Matrix::operator*(double factor) const {
-    Matrix res(rows(), cols());
-    for (size_t r = 0; r < rows_; r++) {
-        for (size_t c = 0; c < cols_; c++) {
-            res(r, c) = (*this)(r, c) * factor;
-        }
-    }
-    return res;
-}
-
+// Addition
 Matrix Matrix::operator+(const Matrix& other) const {
     if ((*this).shape() != other.shape()) 
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
@@ -74,18 +64,6 @@ Matrix Matrix::operator+(const Matrix& other) const {
         }
     }
     return res;
-}
-
-Matrix Matrix::operator+=(const Matrix& other) {
-    if ((*this).shape() != other.shape()) 
-        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
-
-     for (int r = 0; r < rows_; r++) {
-        for (size_t c = 0; c < cols_; c++) {
-            (*this)(r, c) = (*this)(r, c) + other(r, c);
-        }
-    }
-    return *this;
 }
 
 // Subtraction
@@ -102,7 +80,41 @@ Matrix Matrix::operator-(const Matrix& other) const {
     return res;
 }
 
-Matrix Matrix::operator-=(const Matrix& other) {
+// Division
+Matrix Matrix::operator/(double scalar) const { 
+    Matrix res(rows_, cols_);
+    for (size_t i = 0; i < data_.size(); i++) {
+        res.data_[i] /= scalar;
+    }
+    return res;
+}
+
+// Scalar multiplication
+Matrix Matrix::operator*(double factor) const {
+    Matrix res(rows(), cols());
+    for (size_t r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            res(r, c) = (*this)(r, c) * factor;
+        }
+    }
+    return res;
+}
+
+// In-place addition
+Matrix& Matrix::operator+=(const Matrix& other) {
+    if ((*this).shape() != other.shape()) 
+        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
+
+     for (int r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            (*this)(r, c) = (*this)(r, c) + other(r, c);
+        }
+    }
+    return *this;
+}
+
+// In-place subtraction
+Matrix& Matrix::operator-=(const Matrix& other) {
     if ((*this).shape() != other.shape()) 
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
      for (int r = 0; r < rows_; r++) {
@@ -113,23 +125,40 @@ Matrix Matrix::operator-=(const Matrix& other) {
     return *this;
 }
 
+// In-place multiplication
+Matrix& Matrix::operator*=(double factor) {
+    for (size_t i = 0; i < data_.size(); i++) {
+        data_[i] *= factor;
+    }
+    return *this;
+}
+
+// In-place division
+Matrix& Matrix::operator/=(double scalar) {
+    for (size_t i = 0; i < data_.size(); i++) {
+        data_[i] /= scalar;
+    }
+    return *this;
+}
+
 // Matrix shape
 std::tuple<size_t, size_t> Matrix::shape() const {
     return std::make_tuple(rows(), cols());
 }
 
 // Print
-void Matrix::print() const {
-    std::cout << '\n';
-    for (size_t i = 0; i < rows_; i++) {
-        std::cout << "[";
-        for (size_t j = 0; j < cols_; j++) {
-            std::cout << std::fixed << std::setprecision(2) << (*this)(i, j);
-            if (j < cols_ - 1) 
-                std::cout << ", ";
+std::ostream& operator<<(std::ostream& os, const Matrix& m) {
+    os << '\n';
+    for (size_t i = 0; i < m.rows(); i++) {
+        os << "[";
+        for (size_t j = 0; j < m.cols(); j++) {
+            os << std::fixed << std::setprecision(2) << m(i, j);
+            if (j < m.cols() - 1) 
+                os << ", ";
         }
-        std::cout << "]";
-        std::cout << '\n';
+        os << "]";
+        os << '\n';
     }   
-    std::cout << '\n';
+    os << '\n';
+    return os;
 }

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <fstream>
 #include <vector>
 #include <cstddef>   
 #include <stdexcept> 
@@ -13,9 +14,14 @@
 #include <tuple>
 
 class Matrix {
+    private:
+        size_t rows_, cols_;
+        std::vector<double> data_;  // row-major storage
+
     public:
         // default constructor, all zeroes
         Matrix(size_t rows, size_t cols);
+
         // constructor with specific inputs
         Matrix(size_t rows, size_t cols, std::vector<double> ip);
 
@@ -30,21 +36,24 @@ class Matrix {
         size_t rows() const { return rows_; }
         size_t cols() const { return cols_; }
 
-        // Matrix multiply - the core operation
+        // Multiplication
         Matrix operator*(const Matrix& other) const;
         Matrix operator*(double factor) const;
+        Matrix& operator*=(const Matrix& other);
+        Matrix& operator*=(double factor);
 
         // Addition
         Matrix operator+(const Matrix& other) const;
-        Matrix operator+=(const Matrix& other);
+        Matrix& operator+=(const Matrix& other);
 
         // Subtraction
         Matrix operator-(const Matrix& other) const;
-        Matrix operator-=(const Matrix& other);
+        Matrix& operator-=(const Matrix& other);
 
         // Division
         Matrix operator/(double scalar) const;
-
+        Matrix& operator/= (double scalar);
+        
         // Comparison
         bool operator==(const Matrix& other) const;
         bool operator!=(const Matrix& other) const;
@@ -53,10 +62,20 @@ class Matrix {
         Matrix transpose() const;
         Matrix slice(size_t r0, size_t r1, size_t c0, size_t c1) const;
 
-        // Print
-        void print() const;
+        // Reductions
+        double sum() const;
+        double mean() const;
+        double max() const;
+        double min() const;
 
-    private:
-        size_t rows_, cols_;
-        std::vector<double> data_;  // row-major storage
+        // Custom application
+        Matrix apply(std::function<double(double)> func); 
+        Matrix& apply_(std::function<double(double)> func); 
+        
+        // Matrix utils
+        static Matrix zeros(size_t rows, size_t cols);
+        static Matrix ones(size_t rows, size_t cols);
+        static Matrix identity(size_t n);
+
+        friend std::ostream& operator<<(std::ostream& os, const Matrix& m);
 };
