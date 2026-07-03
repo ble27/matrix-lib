@@ -146,6 +146,27 @@ std::tuple<size_t, size_t> Matrix::shape() const {
     return std::make_tuple(rows(), cols());
 }
 
+// Comparison
+bool Matrix::operator==(const Matrix& other) const {
+    if ((*this).shape() != other.shape()) 
+        return false;
+    for (size_t i = 0; i < data_.size(); i++) {
+        if (data_[i] != other.data_[i]) 
+            return false;
+    }
+    return true;
+}
+
+bool Matrix::operator!=(const Matrix& other) const {
+    if ((*this).shape() != other.shape()) 
+        return true;
+    for (size_t i = 0; i < data_.size(); i++) {
+        if (data_[i] != other.data_[i]) 
+            return true;
+    }
+    return false;
+}
+
 // Print
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {
     os << '\n';
