@@ -304,6 +304,45 @@ void test_slice() {
     std::cout << "PASS test_slice\n";
 }
 
+void test_zeros() {
+    Matrix zr = Matrix::zeros(2,3);
+    assert(zr.rows() == 2);
+    assert(zr.cols() == 3);
+    assert(approx_eq(zr(0, 0),  0.0));
+    assert(approx_eq(zr(0, 1),  0.0));
+    assert(approx_eq(zr(0, 2),  0.0));
+    assert(approx_eq(zr(1, 0),  0.0));
+    assert(approx_eq(zr(1, 1),  0.0));
+    assert(approx_eq(zr(1, 2),  0.0));
+    std::cout << "PASS test_zeroes\n";
+}
+
+void test_ones() {
+    Matrix o = Matrix::ones(2,3);
+    assert(o.rows() == 2);
+    assert(o.cols() == 3);
+    assert(approx_eq(o(0, 0),  1.0));
+    assert(approx_eq(o(0, 1),  1.0));
+    assert(approx_eq(o(0, 2),  1.0));
+    assert(approx_eq(o(1, 0),  1.0));
+    assert(approx_eq(o(1, 1),  1.0));
+    assert(approx_eq(o(1, 2),  1.0));
+    std::cout << "PASS test_ones\n";
+}
+
+void test_identity() {
+    Matrix i = Matrix::identity(3);
+    assert(approx_eq(i(0, 0),  1.0));
+    assert(approx_eq(i(0, 1),  0.0));
+    assert(approx_eq(i(0, 2),  0.0));
+    assert(approx_eq(i(1, 0),  0.0));
+    assert(approx_eq(i(1, 1),  1.0));
+    assert(approx_eq(i(1, 2),  0.0));
+    assert(approx_eq(i(2, 0),  0.0));
+    assert(approx_eq(i(2, 1),  0.0));
+    assert(approx_eq(i(2, 2),  1.0));
+    std::cout << "PASS test_identity\n";
+}
 int main() {
     test_construction();
     test_element_access();
@@ -330,6 +369,9 @@ int main() {
     test_min_axis1();
     test_transpose();
     test_slice();
+    test_zeros();
+    test_ones();
+    test_identity();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }

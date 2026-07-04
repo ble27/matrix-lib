@@ -10,7 +10,7 @@
 #include <optional>
 
 Matrix::Matrix(size_t rows, size_t cols) 
-    : rows_(rows), cols_(cols), data_(rows* cols, 0.0) {} 
+    : rows_(rows), cols_(cols), data_(rows * cols, 0.0) {} 
 
 Matrix::Matrix(size_t rows, size_t cols, std::vector<double> ip) 
     : rows_(rows), cols_(cols), data_(rows * cols) {
@@ -130,6 +130,7 @@ Matrix& Matrix::operator+=(const Matrix& other) {
 Matrix& Matrix::operator-(const Matrix& other) {
     if ((*this).shape() != other.shape()) 
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
+
      for (size_t r = 0; r < rows_; r++) {
         for (size_t c = 0; c < cols_; c++) {
             (*this)(r, c) = (*this)(r, c) - other(r, c);
@@ -142,6 +143,7 @@ Matrix& Matrix::operator-(const Matrix& other) {
 Matrix& Matrix::operator-=(const Matrix& other) {
     if ((*this).shape() != other.shape()) 
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
+
      for (size_t r = 0; r < rows_; r++) {
         for (size_t c = 0; c < cols_; c++) {
             (*this)(r, c) = (*this)(r, c) - other(r, c);
@@ -214,9 +216,9 @@ Matrix Matrix::sum(int axis) const {
     Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
     // Across rows res(i, 0) -> row-major
     if (axis == 0) {
-        for (size_t i = 0; i < rows_; i++) {
-            for (size_t j = 0; j < cols_; j++) {
-                res(i, 0) += (*this)(i, j);
+        for (size_t r = 0; r < rows_; r++) {
+            for (size_t c = 0; c < cols_; c++) {
+                res(r, 0) += (*this)(r, c);
             }
         }
         return res;
@@ -237,7 +239,7 @@ double Matrix::mean() const {
     for (size_t i = 0; i < data_.size(); i++) {
         total += data_[i];
     }
-    return  total /= data_.size();
+    return total /= data_.size();
 }
 
 Matrix Matrix::mean(int axis) const {
@@ -245,12 +247,12 @@ Matrix Matrix::mean(int axis) const {
     Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
     // Across rows res(i, 0) -> row-major
     if (axis == 0) {
-        for (size_t i = 0; i < rows_; i++) {
+        for (size_t r = 0; r < rows_; r++) {
             double sum = 0.0;
-            for (size_t j = 0; j < cols_; j++) {
-                sum += (*this)(i, j);
+            for (size_t c = 0; c < cols_; c++) {
+                sum += (*this)(r, c);
             }
-            res(i, 0) = sum / cols_;
+            res(r, 0) = sum / cols_;
         }
         return res;
     }
@@ -377,6 +379,31 @@ Matrix Matrix::slice(size_t r0, size_t r1, size_t c0, size_t c1) const {
         }
     }
     return res;
+}
+
+//=============================================
+// Static methods below have no access to *this 
+//=============================================
+Matrix Matrix::zeros(size_t rows, size_t cols) {
+    return Matrix(rows, cols);
+}   
+
+Matrix Matrix::ones(size_t rows, size_t cols) {
+    Matrix ones(rows, cols);
+    for (size_t i = 0; i < ones.data_.size(); i++) {
+        ones.data_[i] = 1.0;
+    }
+    return ones;
+}
+
+Matrix Matrix::identity(size_t n) {
+    // n = n x n dimension
+    Matrix id(n, n);
+    // idx + n + 1 gives the index of 1s entry
+    for (size_t i = 0; i < id.data_.size(); i+=n+1) {
+        id.data_[i] = 1.0;
+    }
+    return id;
 }
 
 // Print
