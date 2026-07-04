@@ -45,17 +45,14 @@ class Matrix {
 
         // Addition
         Matrix operator+(const Matrix& other) const;
-        Matrix& operator+(const Matrix& other);
         Matrix& operator+=(const Matrix& other);
 
         // Subtraction
         Matrix operator-(const Matrix& other) const;
-        Matrix& operator-(const Matrix& other);
         Matrix& operator-=(const Matrix& other);
 
         // Division
         Matrix operator/(double scalar) const;
-        Matrix& operator/(double scalar);
         Matrix& operator/= (double scalar);
 
         // Comparison
@@ -75,7 +72,7 @@ class Matrix {
         Matrix max(int axis) const;
         double min() const;
         Matrix min(int axis) const;
-    
+        
         // Custom application
         Matrix apply(std::function<double(double)> func); 
         Matrix& apply_(std::function<double(double)> func); 

@@ -82,10 +82,8 @@ Matrix Matrix::operator-(const Matrix& other) const {
 
 // Division
 Matrix Matrix::operator/(double scalar) const { 
-    Matrix res(rows_, cols_);
-    for (size_t i = 0; i < data_.size(); i++) {
-        res.data_[i] /= scalar;
-    }
+    Matrix res = *this;
+    res /= scalar;
     return res;
 }
 
@@ -100,40 +98,14 @@ Matrix Matrix::operator*(double factor) const {
     return res;
 }
 
-// In-place addition expanded
-Matrix& Matrix::operator+(const Matrix& other) {
-    if ((*this).shape() != other.shape()) 
-        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
-
-     for (size_t r = 0; r < rows_; r++) {
-        for (size_t c = 0; c < cols_; c++) {
-            (*this)(r, c) = (*this)(r, c) + other(r, c);
-        }
-    }
-    return *this;
-}
-
 // In-place addition
 Matrix& Matrix::operator+=(const Matrix& other) {
     if ((*this).shape() != other.shape()) 
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
 
-     for (size_t r = 0; r < rows_; r++) {
+    for (size_t r = 0; r < rows_; r++) {
         for (size_t c = 0; c < cols_; c++) {
             (*this)(r, c) = (*this)(r, c) + other(r, c);
-        }
-    }
-    return *this;
-}
-
-// In-place subtraction expanded
-Matrix& Matrix::operator-(const Matrix& other) {
-    if ((*this).shape() != other.shape()) 
-        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
-
-     for (size_t r = 0; r < rows_; r++) {
-        for (size_t c = 0; c < cols_; c++) {
-            (*this)(r, c) = (*this)(r, c) - other(r, c);
         }
     }
     return *this;
@@ -143,7 +115,7 @@ Matrix& Matrix::operator-(const Matrix& other) {
 Matrix& Matrix::operator-=(const Matrix& other) {
     if ((*this).shape() != other.shape()) 
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
-
+    
      for (size_t r = 0; r < rows_; r++) {
         for (size_t c = 0; c < cols_; c++) {
             (*this)(r, c) = (*this)(r, c) - other(r, c);
@@ -156,14 +128,6 @@ Matrix& Matrix::operator-=(const Matrix& other) {
 Matrix& Matrix::operator*=(double factor) {
     for (size_t i = 0; i < data_.size(); i++) {
         data_[i] *= factor;
-    }
-    return *this;
-}
-
-// In-place division expanded
-Matrix& Matrix::operator/(double scalar) {
-    for (size_t i = 0; i < data_.size(); i++) {
-        data_[i] /= scalar;
     }
     return *this;
 }
