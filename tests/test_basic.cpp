@@ -148,6 +148,16 @@ void test_scalar_subtraction() {
     std::cout << "PASS test_scalar_subtraction\n";
 }
 
+void test_dot_product() {
+    Matrix a(2, 2);
+    Matrix b(2, 2);
+    a(0, 0) = 1.0; a(0, 1) = 7.0; a(1, 0) = 6.0; a(1, 1) = 9.0;
+    b(0, 0) = 2.0; b(0, 1) = 5.0; b(1, 0) = 11.0; b(1, 1) = 4.0;
+    double dot_total = a.dot(b);
+    assert(dot_total == 2 + 35 + 66 + 36);
+    std::cout << "PASS test_dot_product\n";
+}
+
 void test_equality() {
     Matrix a(2, 2);
     Matrix b(2, 2);
@@ -389,6 +399,7 @@ int main() {
     test_scalar_addition();
     test_subtraction_elementwise();
     test_scalar_subtraction();
+    test_dot_product();
     test_equality();
     test_non_equality();
     test_construction();

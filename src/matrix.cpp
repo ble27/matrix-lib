@@ -98,6 +98,18 @@ Matrix Matrix::operator*(double factor) const {
     return res;
 }
 
+// Elementwise multiplication
+Matrix Matrix::elementwise_multiply(const Matrix& other) const {
+    if ((*this).shape() != other.shape())
+        throw std::runtime_error("Dimension mismatch for elementwise multiplication\n");
+
+    Matrix res(rows_, cols_);
+    for (size_t i = 0; i < data_.size(); i++) {
+        res.data_[i] = data_[i] * other.data_[i];
+    }
+    return res;
+}
+
 // In-place addition
 Matrix& Matrix::operator+=(const Matrix& other) {
     if ((*this).shape() != other.shape()) 
@@ -168,8 +180,20 @@ Matrix& Matrix::operator/=(double scalar) {
     return *this;
 }
 
+// Dot product
+double Matrix::dot(const Matrix& other) const {
+    if ((*this).shape() != other.shape())
+        throw std::runtime_error("Dimension mistmatch incompatible for matrix dot product\n");
+    
+    double dot_total = 0.0;        
+    for (size_t i = 0; i < data_.size(); i++) {
+        dot_total += data_[i] * other.data_[i];
+    }
+    return dot_total;
+}
+
 // Matrix shape
-std::tuple<size_t, size_t> Matrix::shape() const {
+std::tuple<size_t, size_t> Matrix::shape() const noexcept {
     return std::make_tuple(rows(), cols());
 }
 
@@ -334,7 +358,7 @@ Matrix Matrix::min(int axis) const {
     }
 }
 
-Matrix Matrix::apply(std::function<double(double)> func) {
+Matrix Matrix::apply(std::function<double(double)> func) const {
     Matrix res(rows_, cols_);
     for (size_t i = 0; i < data_.size(); i++) { 
         res.data_[i] = func(data_[i]);
@@ -374,7 +398,9 @@ Matrix Matrix::slice(size_t r0, size_t r1, size_t c0, size_t c1) const {
 }
 
 //=============================================
+//
 // Static methods below have no access to *this 
+//
 //=============================================
 Matrix Matrix::zeros(size_t rows, size_t cols) {
     return Matrix(rows, cols);
