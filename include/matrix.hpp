@@ -64,6 +64,12 @@ class Matrix {
         // Dot product
         [[nodiscard]] double dot(const Matrix& other) const;
 
+        // Norms
+        [[nodiscard]] double l1_elementwise_norm() const;   // manhattan or taxicab norm
+        [[nodiscard]] double l1_induced_norm() const;   // max absolute sum of columns
+        [[nodiscard]] double l2_norm() const;   // frobenius norm for matrix or euclidean norm for vector
+        [[nodiscard]] double inf_norm() const; // max or infinity norm
+
         // Comparison
         [[nodiscard]] bool operator==(const Matrix& other) const;
         [[nodiscard]] bool operator!=(const Matrix& other) const;
