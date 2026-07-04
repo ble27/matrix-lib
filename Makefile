@@ -1,5 +1,5 @@
 CXX      = g++
-CXXFLAGS = -std=c++17 -O2 -Wall -Wextra -I include
+CXXFLAGS = -std=c++20 -O2 -Wall -Wextra -I include
 
 SRC      = src/matrix.cpp
 TEST_SRC = tests/test_basic.cpp

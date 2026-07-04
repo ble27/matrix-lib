@@ -58,7 +58,7 @@ Matrix Matrix::operator+(const Matrix& other) const {
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
 
     Matrix res(rows_, cols_);
-    for (int r = 0; r < rows_; r++) {
+    for (size_t r = 0; r < rows_; r++) {
         for (size_t c = 0; c < cols_; c++) {
             res(r, c) = (*this)(r, c) + other(r, c);
         }
@@ -72,7 +72,7 @@ Matrix Matrix::operator-(const Matrix& other) const {
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
 
     Matrix res(rows_, cols_);
-    for (int r = 0; r < rows_; r++) {
+    for (size_t r = 0; r < rows_; r++) {
         for (size_t c = 0; c < cols_; c++) {
             res(r, c) = (*this)(r, c) - other(r, c);
         }
@@ -100,14 +100,39 @@ Matrix Matrix::operator*(double factor) const {
     return res;
 }
 
+// In-place addition expanded
+Matrix& Matrix::operator+(const Matrix& other) {
+    if ((*this).shape() != other.shape()) 
+        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
+
+     for (size_t r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            (*this)(r, c) = (*this)(r, c) + other(r, c);
+        }
+    }
+    return *this;
+}
+
 // In-place addition
 Matrix& Matrix::operator+=(const Matrix& other) {
     if ((*this).shape() != other.shape()) 
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
 
-     for (int r = 0; r < rows_; r++) {
+     for (size_t r = 0; r < rows_; r++) {
         for (size_t c = 0; c < cols_; c++) {
             (*this)(r, c) = (*this)(r, c) + other(r, c);
+        }
+    }
+    return *this;
+}
+
+// In-place subtraction expanded
+Matrix& Matrix::operator-(const Matrix& other) {
+    if ((*this).shape() != other.shape()) 
+        throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
+     for (size_t r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            (*this)(r, c) = (*this)(r, c) - other(r, c);
         }
     }
     return *this;
@@ -117,7 +142,7 @@ Matrix& Matrix::operator+=(const Matrix& other) {
 Matrix& Matrix::operator-=(const Matrix& other) {
     if ((*this).shape() != other.shape()) 
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
-     for (int r = 0; r < rows_; r++) {
+     for (size_t r = 0; r < rows_; r++) {
         for (size_t c = 0; c < cols_; c++) {
             (*this)(r, c) = (*this)(r, c) - other(r, c);
         }
@@ -129,6 +154,14 @@ Matrix& Matrix::operator-=(const Matrix& other) {
 Matrix& Matrix::operator*=(double factor) {
     for (size_t i = 0; i < data_.size(); i++) {
         data_[i] *= factor;
+    }
+    return *this;
+}
+
+// In-place division expanded
+Matrix& Matrix::operator/(double scalar) {
+    for (size_t i = 0; i < data_.size(); i++) {
+        data_[i] /= scalar;
     }
     return *this;
 }
@@ -165,6 +198,146 @@ bool Matrix::operator!=(const Matrix& other) const {
             return true;
     }
     return false;
+}
+
+// Reductions
+double Matrix::sum() const {
+    double total = 0;
+    for (size_t i = 0; i < data_.size(); i++) {
+        total += data_[i];
+    }
+    return total;
+};
+
+Matrix Matrix::sum(int axis) const {
+    // 0 = across rows, 1 = across cols
+    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+    // Across rows res(i, 0) -> row-major
+    if (axis == 0) {
+        for (size_t i = 0; i < rows_; i++) {
+            for (size_t j = 0; j < cols_; j++) {
+                res(i, 0) += (*this)(i, j);
+            }
+        }
+        return res;
+    }
+    // Across cols res(0, c) -> col-major
+    else {
+       for (size_t c = 0; c < cols_; c++) {
+            for (size_t r = 0; r < rows_; r++) {
+                res(0, c) += (*this)(r, c);
+            } 
+        }
+        return res;
+    }
+};
+
+double Matrix::mean() const {
+    double total = 0.0;
+    for (size_t i = 0; i < data_.size(); i++) {
+        total += data_[i];
+    }
+    return  total /= data_.size();
+}
+
+Matrix Matrix::mean(int axis) const {
+    // 0 = across rows, 1 = across cols
+    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+    // Across rows res(i, 0) -> row-major
+    if (axis == 0) {
+        for (size_t i = 0; i < rows_; i++) {
+            double sum = 0.0;
+            for (size_t j = 0; j < cols_; j++) {
+                sum += (*this)(i, j);
+            }
+            res(i, 0) = sum / cols_;
+        }
+        return res;
+    }
+    // Across cols res(0, c) -> col-major
+    else {
+       for (size_t c = 0; c < cols_; c++) {
+            for (size_t r = 0; r < rows_; r++) {
+                res(0, c) += (*this)(r, c);
+            } 
+            res(0, c) /= rows_;
+        }
+        return res;
+    }
+};
+
+double Matrix::max() const {
+    double max = data_[0];
+    for (size_t i = 1; i < data_.size(); i++) {
+        if (data_[i] > max) 
+            max = data_[i];
+    }
+    return max;
+};
+
+Matrix Matrix::max(int axis) const {
+    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+    // Across rows
+    if (axis == 0) {
+        for (size_t r = 0; r < rows_; r++) {
+            double cur_max = (*this)(r, 0); 
+            for (size_t c = 1; c < cols_; c++) {
+                if ((*this)(r, c) > cur_max)
+                    cur_max = (*this)(r, c);
+            }
+            res(r, 0) = cur_max;
+        }
+        return res;
+    }
+    // Across cols
+    else {
+        for (size_t c = 0; c < cols_; c++) {
+            double cur_max = (*this)(0, c);
+            for (size_t r = 1; r < rows_; r++) {
+                if ((*this)(r, c) > cur_max)
+                    cur_max = (*this)(r, c);
+            }
+            res(0, c) = cur_max;
+        }
+        return res;
+    }
+};
+
+double Matrix::min() const {
+    double cur_min = data_[0];
+    for (size_t i = 1; i < data_.size(); i++) {
+        if (data_[i] < cur_min) 
+            cur_min = data_[i];
+    }
+    return cur_min;
+};
+
+Matrix Matrix::min(int axis) const {
+    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+    // Across rows
+    if (axis == 0) {
+        for (size_t r = 0; r < rows_; r++) {
+            double cur_min = (*this)(r, 0); 
+            for (size_t c = 1; c < cols_; c++) {
+                if ((*this)(r, c) < cur_min)
+                    cur_min = (*this)(r, c);
+            }
+            res(r, 0) = cur_min;
+        }
+        return res;
+    }
+    // Across cols
+    else {
+        for (size_t c = 0; c < cols_; c++) {
+            double cur_min = (*this)(0, c);
+            for (size_t r = 1; r < rows_; r++) {
+                if ((*this)(r, c) < cur_min)
+                    cur_min = (*this)(r, c);
+            }
+            res(0, c) = cur_min;
+        }
+        return res;
+    }
 }
 
 // Print

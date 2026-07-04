@@ -19,6 +19,7 @@ class Matrix {
         std::vector<double> data_;  // row-major storage
 
     public:
+        Matrix();
         // default constructor, all zeroes
         Matrix(size_t rows, size_t cols);
 
@@ -44,16 +45,19 @@ class Matrix {
 
         // Addition
         Matrix operator+(const Matrix& other) const;
+        Matrix& operator+(const Matrix& other);
         Matrix& operator+=(const Matrix& other);
 
         // Subtraction
         Matrix operator-(const Matrix& other) const;
+        Matrix& operator-(const Matrix& other);
         Matrix& operator-=(const Matrix& other);
 
         // Division
         Matrix operator/(double scalar) const;
+        Matrix& operator/(double scalar);
         Matrix& operator/= (double scalar);
-        
+
         // Comparison
         bool operator==(const Matrix& other) const;
         bool operator!=(const Matrix& other) const;
@@ -64,9 +68,13 @@ class Matrix {
 
         // Reductions
         double sum() const;
+        Matrix sum(int axis) const;
+        Matrix mean(int axis) const;
         double mean() const;
         double max() const;
+        Matrix max(int axis) const;
         double min() const;
+        Matrix min(int axis) const;
 
         // Custom application
         Matrix apply(std::function<double(double)> func); 
