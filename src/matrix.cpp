@@ -111,15 +111,43 @@ Matrix& Matrix::operator+=(const Matrix& other) {
     return *this;
 }
 
+// Scalar addition
+Matrix Matrix::operator+(double scalar) const {
+    Matrix res = *this;
+    res += scalar;
+    return res;
+}
+
+Matrix& Matrix::operator+=(double scalar) {
+    for (size_t i = 0; i < data_.size(); i++) {
+        data_[i] += scalar;
+    }
+    return *this;
+}
+
 // In-place subtraction
 Matrix& Matrix::operator-=(const Matrix& other) {
     if ((*this).shape() != other.shape()) 
         throw std::runtime_error("Invalid matrix addition due to dimension mismatch\n");
-    
+
      for (size_t r = 0; r < rows_; r++) {
         for (size_t c = 0; c < cols_; c++) {
             (*this)(r, c) = (*this)(r, c) - other(r, c);
         }
+    }
+    return *this;
+}
+
+// Scalar subtraction
+Matrix Matrix::operator-(double scalar) const {
+    Matrix res = *this;
+    res -= scalar;
+    return res;
+}
+
+Matrix& Matrix::operator-=(double scalar) {
+    for (size_t i = 0; i < data_.size(); i++) {
+        data_[i] -= scalar;
     }
     return *this;
 }

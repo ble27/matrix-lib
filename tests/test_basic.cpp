@@ -99,6 +99,24 @@ void test_addition_elementwise() {
     std::cout << "PASS test_addition_elementwise\n";
 }
 
+void test_scalar_addition() {
+    Matrix a(2, 2);
+    Matrix b(2, 2);
+    a(0, 0) = 1.0; a(0, 1) = 7.0; a(1, 0) = 6.0; a(1, 1) = 9.0;
+    b(0, 0) = 2.0; b(0, 1) = 5.0; b(1, 0) = 11.0; b(1, 1) = 4.0;
+    a = a + 2;
+    b += 3;
+    assert(approx_eq(a(0,0), 3.0));
+    assert(approx_eq(a(0,1), 9.0));
+    assert(approx_eq(a(1,0), 8.0));
+    assert(approx_eq(a(1,1), 11.0));
+    assert(approx_eq(b(0,0), 5.0));
+    assert(approx_eq(b(0,1), 8.0));
+    assert(approx_eq(b(1,0), 14.0));
+    assert(approx_eq(b(1,1), 7.0));
+    std::cout << "PASS test_scalar_addition\n";
+}
+
 void test_subtraction_elementwise() {
     Matrix a(2, 2);
     Matrix b(2, 2);
@@ -110,6 +128,24 @@ void test_subtraction_elementwise() {
     assert(approx_eq(c(1,0), 3.0));
     assert(approx_eq(c(1,1), 5.0));
     std::cout << "PASS test_subtraction_elementwise\n";
+}
+
+void test_scalar_subtraction() {
+    Matrix a(2, 2);
+    Matrix b(2, 2);
+    a(0, 0) = 1.0; a(0, 1) = 7.0; a(1, 0) = 6.0; a(1, 1) = 9.0;
+    b(0, 0) = 2.0; b(0, 1) = 5.0; b(1, 0) = 11.0; b(1, 1) = 4.0;
+    a = a - 2;
+    b -= 3;
+    assert(approx_eq(a(0,0), -1.0));
+    assert(approx_eq(a(0,1), 5.0));
+    assert(approx_eq(a(1,0), 4.0));
+    assert(approx_eq(a(1,1), 7.0));
+    assert(approx_eq(b(0,0), -1.0));
+    assert(approx_eq(b(0,1), 2.0));
+    assert(approx_eq(b(1,0), 8.0));
+    assert(approx_eq(b(1,1), 1.0));
+    std::cout << "PASS test_scalar_subtraction\n";
 }
 
 void test_equality() {
@@ -350,7 +386,9 @@ int main() {
     test_multiplication_factor();
     test_division_factor();
     test_addition_elementwise();
+    test_scalar_addition();
     test_subtraction_elementwise();
+    test_scalar_subtraction();
     test_equality();
     test_non_equality();
     test_construction();
