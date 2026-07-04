@@ -269,6 +269,41 @@ void test_min_axis1() {
     std::cout << "PASS test_min_axis1\n";
 }
 
+void test_transpose() {
+    // original (2x3):        transposed (3x2):
+    //  1  2  3                1  4
+    //  4  5  6                2  5
+    //                         3  6
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix t = a.transpose();
+
+    // check dimensions flipped
+    assert(t.rows() == 3);
+    assert(t.cols() == 2);
+
+    // check values
+    assert(approx_eq(t(0, 0), 1.0));
+    assert(approx_eq(t(0, 1), 4.0));
+    std::cout << "PASS test_transpose\n";
+}
+
+void test_slice() {
+    Matrix a(3, 4, {1.0,  2.0,  3.0,  4.0,
+                    5.0,  6.0,  7.0,  8.0,
+                    9.0, 10.0, 11.0, 12.0});
+
+    // slice rows 1-2, cols 1-2 → should give [[6,7],[10,11]]
+    Matrix s = a.slice(1, 2, 1, 2);
+    assert(s.rows() == 2);
+    assert(s.cols() == 2);
+    assert(approx_eq(s(0, 0),  6.0));
+    assert(approx_eq(s(0, 1),  7.0));
+    assert(approx_eq(s(1, 0), 10.0));
+    assert(approx_eq(s(1, 1), 11.0));
+    std::cout << "PASS test_slice\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -293,6 +328,8 @@ int main() {
     test_min_all();
     test_min_axis0();
     test_min_axis1();
+    test_transpose();
+    test_slice();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }

@@ -355,6 +355,30 @@ Matrix& Matrix::apply_(std::function<double(double)> func) {
     return *this;
 }
 
+Matrix Matrix::transpose() const {
+    Matrix tp(cols_, rows_);
+    for (size_t c = 0; c < cols_; c++) {
+        for (size_t r = 0; r < rows_; r++) {
+            tp(c, r) = (*this)(r, c);
+        }
+    }
+    return tp;
+}
+
+Matrix Matrix::slice(size_t r0, size_t r1, size_t c0, size_t c1) const {
+    if (r1 < r0 || c1 < c0 || r1 >= rows_ || c1 >= cols_) 
+        throw std::runtime_error("Invalid dimension for matrix slicing\n");
+        
+    Matrix res(r1 - r0 + 1, c1 - c0 + 1);
+    for (size_t r = r0; r <= r1; r++) {
+        for (size_t c = c0; c <= c1; c++) {
+            // shift the original coordinate to res's new coordinate 
+            res(r - r0, c - c0) = (*this)(r, c);
+        }
+    }
+    return res;
+}
+
 // Print
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {
     os << '\n';
