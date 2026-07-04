@@ -75,7 +75,7 @@ class Matrix {
         Matrix max(int axis) const;
         double min() const;
         Matrix min(int axis) const;
-
+    
         // Custom application
         Matrix apply(std::function<double(double)> func); 
         Matrix& apply_(std::function<double(double)> func); 

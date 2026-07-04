@@ -340,6 +340,21 @@ Matrix Matrix::min(int axis) const {
     }
 }
 
+Matrix Matrix::apply(std::function<double(double)> func) {
+    Matrix res(rows_, cols_);
+    for (size_t i = 0; i < data_.size(); i++) { 
+        res.data_[i] = func(data_[i]);
+    }
+    return res;
+}
+
+Matrix& Matrix::apply_(std::function<double(double)> func) {
+    for (size_t i = 0; i < data_.size(); i++) {
+        (*this).data_[i] = func(data_[i]);
+    }
+    return *this;
+}
+
 // Print
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {
     os << '\n';
