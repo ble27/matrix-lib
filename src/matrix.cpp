@@ -422,6 +422,16 @@ Matrix Matrix::identity(size_t n) {
 }
 
 //==============================
+// Utilities
+//==============================
+
+void Matrix::fill(double value) {}
+Matrix Matrix::clip(double min, double max) {}
+Matrix& Matrix::reshape(double row, double col) const {}
+Matrix Matrix::flatten() const {}
+
+
+//==============================
 // Output
 //==============================
 
