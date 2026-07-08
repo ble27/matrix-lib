@@ -425,10 +425,43 @@ Matrix Matrix::identity(size_t n) {
 // Utilities
 //==============================
 
-void Matrix::fill(double value) {}
-Matrix Matrix::clip(double min, double max) {}
-Matrix& Matrix::reshape(double row, double col) const {}
-Matrix Matrix::flatten() const {}
+void Matrix::fill(double value) {
+    for (size_t i = 0; i < data_.size(); i++) {
+        data_[i] = value;
+    }
+}
+
+Matrix Matrix::clip(double min, double max) {
+    Matrix res = *this;
+    if (min > max)
+        throw std::runtime_error("Minimum value less than maximum value\n");
+
+    for (size_t i = 0; i < data_.size(); i++) {
+        if (res.data_[i] <= min) {
+            res.data_[i] = min;
+        }
+        if (res.data_[i] >= max) {
+            res.data_[i] = max;
+        }
+    }
+    return res;
+}
+
+Matrix Matrix::reshape(double row, double col) const {
+    if (row * col != rows_ * cols_) 
+        throw std::runtime_error("Reshape size mistmatch - element count must match\n");
+
+    Matrix res(row, col);
+    res.data_ = (*this).data_;
+    return res;
+}
+
+// 1 * (rows_ * cols_) matrix
+Matrix Matrix::flatten() const {
+    Matrix res(1, rows_ * cols_);
+    res.data_ = (*this).data_;
+    return res;
+}
 
 
 //==============================

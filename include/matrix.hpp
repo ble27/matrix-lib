@@ -100,8 +100,9 @@ class Matrix {
         // To implement
                       void fill(double value); 
                       Matrix clip(double min, double max);
-        [[nodiscard]] Matrix& reshape(double row, double col) const;
+        [[nodiscard]] Matrix reshape(double row, double col) const;
         [[nodiscard]] Matrix flatten() const;
+
         // Linear algebra
         [[nodiscard]] Matrix inverse() const;
         [[nodiscard]] double determinant() const;

@@ -389,6 +389,58 @@ void test_identity() {
     assert(approx_eq(i(2, 2),  1.0));
     std::cout << "PASS test_identity\n";
 }
+
+void test_fill() {
+    Matrix i(2, 3);
+    i.fill(1);
+    assert(approx_eq(i(0, 0), 1.0));
+    assert(approx_eq(i(0, 1), 1.0));
+    assert(approx_eq(i(0, 2), 1.0));
+    assert(approx_eq(i(1, 0), 1.0));
+    assert(approx_eq(i(1, 1), 1.0));
+    assert(approx_eq(i(1, 2), 1.0));
+    std::cout << "PASS test_fill\n";
+}
+
+void test_clip() {
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix b = a.clip(2, 4);
+    assert(approx_eq(b(0, 0), 2.0));
+    assert(approx_eq(b(0, 1), 2.0));
+    assert(approx_eq(b(0, 2), 3.0));
+    assert(approx_eq(b(1, 0), 4.0));
+    assert(approx_eq(b(1, 1), 4.0));
+    assert(approx_eq(b(1, 2), 4.0));
+    std::cout << "PASS test_clip\n";
+}
+
+void test_reshape() {
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix b = a.reshape(1, 6);
+    assert(approx_eq(b(0, 0), 1.0));
+    assert(approx_eq(b(0, 1), 2.0));
+    assert(approx_eq(b(0, 2), 3.0));
+    assert(approx_eq(b(0, 3), 4.0));
+    assert(approx_eq(b(0, 4), 5.0));
+    assert(approx_eq(b(0, 5), 6.0));
+    std::cout << "PASS test_reshape\n";
+}
+
+void test_flatten() {
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix b = a.flatten();
+    assert(approx_eq(b(0, 0), 1.0));
+    assert(approx_eq(b(0, 1), 2.0));
+    assert(approx_eq(b(0, 2), 3.0));
+    assert(approx_eq(b(0, 3), 4.0));
+    assert(approx_eq(b(0, 4), 5.0));
+    assert(approx_eq(b(0, 5), 6.0));
+    std::cout << "PASS test_flatten\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -421,6 +473,10 @@ int main() {
     test_zeros();
     test_ones();
     test_identity();
+    test_fill();
+    test_clip();
+    test_reshape();
+    test_flatten();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }
