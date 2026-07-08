@@ -441,6 +441,109 @@ void test_flatten() {
     std::cout << "PASS test_flatten\n";
 }
 
+void test_hstack() {
+    // A (2x2):    B (2x3):    expected (2x5):
+    // 1  2        5  6  7     1  2  5  6  7
+    // 3  4        8  9  10    3  4  8  9  10
+    Matrix A(2, 2, {1.0, 2.0,
+                    3.0, 4.0});
+    Matrix B(2, 3, {5.0,  6.0,  7.0,
+                    8.0,  9.0, 10.0});
+
+    Matrix res = Matrix::hstack(A, B);
+
+    // check dimensions
+    assert(res.rows() == 2);
+    assert(res.cols() == 5);
+
+    // check values — left side from A
+    assert(approx_eq(res(0, 0), 1.0));
+    assert(approx_eq(res(0, 1), 2.0));
+    assert(approx_eq(res(1, 0), 3.0));
+    assert(approx_eq(res(1, 1), 4.0));
+
+    // check values — right side from B
+    assert(approx_eq(res(0, 2),  5.0));
+    assert(approx_eq(res(0, 3),  6.0));
+    assert(approx_eq(res(0, 4),  7.0));
+    assert(approx_eq(res(1, 2),  8.0));
+    assert(approx_eq(res(1, 3),  9.0));
+    assert(approx_eq(res(1, 4), 10.0));
+
+    std::cout << "PASS test_hstack\n";
+}
+
+void test_hstack_throws_on_row_mismatch() {
+    // different number of rows — should throw
+    Matrix A(2, 2, {1.0, 2.0, 3.0, 4.0});
+    Matrix B(3, 2, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
+
+    bool threw = false;
+    try {
+        Matrix res = Matrix::hstack(A, B);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_hstack_throws_on_row_mismatch\n";
+}
+
+void test_vstack() {
+    // A (2x3):    B (3x3):    expected (5x3):
+    // 1  2  3     7  8  9     1  2  3
+    // 4  5  6     10 11 12    4  5  6
+    //             13 14 15    7  8  9
+    //                         10 11 12
+    //                         13 14 15
+    Matrix A(2, 3, {1.0,  2.0,  3.0,
+                    4.0,  5.0,  6.0});
+    Matrix B(3, 3, {7.0,  8.0,  9.0,
+                    10.0, 11.0, 12.0,
+                    13.0, 14.0, 15.0});
+
+    Matrix res = Matrix::vstack(A, B);
+
+    // check dimensions
+    assert(res.rows() == 5);
+    assert(res.cols() == 3);
+
+    // check values — top from A
+    assert(approx_eq(res(0, 0), 1.0));
+    assert(approx_eq(res(0, 1), 2.0));
+    assert(approx_eq(res(0, 2), 3.0));
+    assert(approx_eq(res(1, 0), 4.0));
+    assert(approx_eq(res(1, 1), 5.0));
+    assert(approx_eq(res(1, 2), 6.0));
+
+    // check values — bottom from B
+    assert(approx_eq(res(2, 0),  7.0));
+    assert(approx_eq(res(2, 1),  8.0));
+    assert(approx_eq(res(2, 2),  9.0));
+    assert(approx_eq(res(3, 0), 10.0));
+    assert(approx_eq(res(3, 1), 11.0));
+    assert(approx_eq(res(3, 2), 12.0));
+    assert(approx_eq(res(4, 0), 13.0));
+    assert(approx_eq(res(4, 1), 14.0));
+    assert(approx_eq(res(4, 2), 15.0));
+
+    std::cout << "PASS test_vstack\n";
+}
+
+void test_vstack_throws_on_col_mismatch() {
+    // different number of cols — should throw
+    Matrix A(2, 3, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
+    Matrix B(2, 2, {1.0, 2.0, 3.0, 4.0});
+
+    bool threw = false;
+    try {
+        Matrix res = Matrix::vstack(A, B);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_vstack_throws_on_col_mismatch\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -477,6 +580,10 @@ int main() {
     test_clip();
     test_reshape();
     test_flatten();
+    test_hstack();
+    test_hstack_throws_on_row_mismatch();
+    test_vstack();
+    test_vstack_throws_on_col_mismatch();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }

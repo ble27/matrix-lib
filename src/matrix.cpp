@@ -463,6 +463,47 @@ Matrix Matrix::flatten() const {
     return res;
 }
 
+//==============================
+// Stacking
+//==============================
+
+Matrix Matrix::hstack(const Matrix& a, const Matrix& b) {
+    if (a.rows() != b.rows())
+        throw std::runtime_error("Row dimension mismatch - unable to group matrix horizontally\n");
+
+    // both matrices have the same row but different cols
+    size_t tot_col = a.cols() + b.cols();
+    Matrix res(a.rows(), tot_col);
+
+    for (size_t r = 0; r < a.rows(); r++) {
+        size_t cb = 0;
+        for (size_t c = 0; c < tot_col; c++) {
+            // add b's entries 
+            if (c > tot_col - b.cols() - 1) {
+                res(r, c) = b(r, cb);
+                cb++;
+            }
+            // add a's entries
+            else 
+                res(r, c) = a(r, c);
+        }
+    }
+    return res;
+}
+
+Matrix Matrix::vstack(const Matrix& a, const Matrix& b) {
+    if (a.cols() != b.cols())
+        throw std::runtime_error("Column dimension mismatch - unable to group matrix horizontally\n");
+
+    Matrix res(a.rows() + b.rows(), a.cols());
+    for (size_t i = 0; i < a.data_.size(); i++) {
+        res.data_[i] = a.data_[i];
+    }
+    for (size_t i = 0; i < b.data_.size(); i++) {
+        res.data_[i + a.data_.size()] = b.data_[i];
+    }
+    return res;
+}
 
 //==============================
 // Output
