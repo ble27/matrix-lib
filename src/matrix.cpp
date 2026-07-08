@@ -506,6 +506,92 @@ Matrix Matrix::vstack(const Matrix& a, const Matrix& b) {
 }
 
 //==============================
+// Arg Index
+//==============================
+
+size_t Matrix::argmax() const {
+    size_t idx = 0;
+    for (size_t i = 1; i < data_.size(); i++) {
+        if (data_[i] > data_[idx]) {
+            idx = i;
+        }
+    }
+    return idx;
+}   
+
+size_t Matrix::argmin() const {
+    size_t idx = 0;
+    for (size_t i = 1; i < data_.size(); i++) {
+        if (data_[i] < data_[idx]) {
+            idx = i;
+        }
+    }
+    return idx;
+}
+
+Matrix Matrix::argmax(int axis) const {
+    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+
+    // Across rows
+    if (axis == 0) {
+        for (size_t r = 0; r < rows_; r++) {
+            size_t cur_max_col = 0;
+            for (size_t c = 1; c < cols_; c++) {
+                if ((*this)(r, c) > (*this)(r, cur_max_col)) {
+                    cur_max_col = c;
+                }
+            }
+            res(r, 0) = static_cast<double>(cur_max_col); 
+        }
+        return res;
+    }
+    // Across cols
+    else {
+        for (size_t c = 0; c < cols_; c++) {
+            size_t cur_max_row = 0;
+            for (size_t r = 1; r < rows_; r++) {
+                if ((*this)(r, c) > (*this)(cur_max_row, c)) {
+                    cur_max_row = r;
+                }
+            }
+            res(0, c) = static_cast<double>(cur_max_row); 
+        }
+        return res;
+    }
+} 
+
+Matrix Matrix::argmin(int axis) const {
+    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+
+    // Across rows
+    if (axis == 0) {
+        for (size_t r = 0; r < rows_; r++) {
+            size_t cur_min_col = 0;
+            for (size_t c = 1; c < cols_; c++) {
+                if ((*this)(r, c) < (*this)(r, cur_min_col)) {
+                    cur_min_col = c;
+                }
+            }
+            res(r, 0) = static_cast<double>(cur_min_col); 
+        }
+        return res;
+    }
+    // Across cols
+    else {
+        for (size_t c = 0; c < cols_; c++) {
+            size_t cur_min_row = 0;
+            for (size_t r = 1; r < rows_; r++) {
+                if ((*this)(r, c) < (*this)(cur_min_row, c)) {
+                    cur_min_row = r;
+                }
+            }
+            res(0, c) = static_cast<double>(cur_min_row); 
+        }
+        return res;
+    }
+}
+
+//==============================
 // Output
 //==============================
 

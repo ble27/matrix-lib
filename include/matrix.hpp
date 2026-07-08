@@ -102,20 +102,20 @@ class Matrix {
         [[nodiscard]] Matrix reshape(double row, double col) const;
         [[nodiscard]] Matrix flatten() const;
 
+        [[nodiscard]] static Matrix hstack(const Matrix& a, const Matrix& b); // side by side
+        [[nodiscard]] static Matrix vstack(const Matrix& a, const Matrix& b); // on top
+
         // To implement
         // Linear algebra
         [[nodiscard]] Matrix inverse() const;
         [[nodiscard]] double determinant() const;
         [[nodiscard]] Matrix solve(const Matrix& b) const;      
 
-        [[nodiscard]] static Matrix hstack(const Matrix& a, const Matrix& b); // side by side
-        [[nodiscard]] static Matrix vstack(const Matrix& a, const Matrix& b); // on top
-
         [[nodiscard]] size_t argmax() const;          // index in flat data_
         [[nodiscard]] size_t argmin() const;
         [[nodiscard]] Matrix argmax(int axis) const;  // per row or col
         [[nodiscard]] Matrix argmin(int axis) const;
-
+    
         void save(const std::string& filename) const;   // write to CSV
         [[nodiscard]] static Matrix load(const std::string& filename); // read from CSV
         

@@ -544,6 +544,131 @@ void test_vstack_throws_on_col_mismatch() {
     std::cout << "PASS test_vstack_throws_on_col_mismatch\n";
 }
 
+void test_argmax_flat() {
+    // data_ = [3, 1, 4, 1, 5, 2]
+    // max = 5 at flat index 4
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    assert(a.argmax() == 4);
+    std::cout << "PASS test_argmax_flat\n";
+}
+
+void test_argmax_flat_first_element() {
+    // max is at index 0 — tests that initialization to idx=0 is correct
+    Matrix a(2, 3, {9.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    assert(a.argmax() == 0);
+    std::cout << "PASS test_argmax_flat_first_element\n";
+}
+
+void test_argmax_flat_last_element() {
+    // max is at last index — tests the loop runs to the end
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 9.0});
+    assert(a.argmax() == 5);
+    std::cout << "PASS test_argmax_flat_last_element\n";
+}
+
+void test_argmin_flat() {
+    // data_ = [3, 1, 4, 1, 5, 2]
+    // min = 1 at flat index 1 (first occurrence)
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    assert(a.argmin() == 1);
+    std::cout << "PASS test_argmin_flat\n";
+}
+
+void test_argmin_flat_first_element() {
+    // min is at index 0
+    Matrix a(2, 3, {0.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    assert(a.argmin() == 0);
+    std::cout << "PASS test_argmin_flat_first_element\n";
+}
+
+void test_argmin_flat_last_element() {
+    // min is at last index
+    Matrix a(2, 3, {9.0, 8.0, 7.0,
+                    6.0, 5.0, 1.0});
+    assert(a.argmin() == 5);
+    std::cout << "PASS test_argmin_flat_last_element\n";
+}
+
+void test_argmax_axis0() {
+    // axis=0 → per row, which col has the max
+    // row 0: max(3,1,4) → col 2
+    // row 1: max(1,5,2) → col 1
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    Matrix res = a.argmax(0);
+
+    assert(res.rows() == 2);
+    assert(res.cols() == 1);
+    assert(approx_eq(res(0, 0), 2.0));  // col 2
+    assert(approx_eq(res(1, 0), 1.0));  // col 1
+    std::cout << "PASS test_argmax_axis0\n";
+}
+
+void test_argmax_axis0_first_col() {
+    // max is always in col 0 — tests initialization to best_col=0 is correct
+    Matrix a(2, 3, {9.0, 1.0, 2.0,
+                    8.0, 3.0, 4.0});
+    Matrix res = a.argmax(0);
+
+    assert(approx_eq(res(0, 0), 0.0));
+    assert(approx_eq(res(1, 0), 0.0));
+    std::cout << "PASS test_argmax_axis0_first_col\n";
+}
+
+void test_argmax_axis1() {
+    // axis=1 → per col, which row has the max
+    // col 0: max(3,1) → row 0
+    // col 1: max(1,5) → row 1
+    // col 2: max(4,2) → row 0
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    Matrix res = a.argmax(1);
+
+    assert(res.rows() == 1);
+    assert(res.cols() == 3);
+    assert(approx_eq(res(0, 0), 0.0));  // row 0
+    assert(approx_eq(res(0, 1), 1.0));  // row 1
+    assert(approx_eq(res(0, 2), 0.0));  // row 0
+    std::cout << "PASS test_argmax_axis1\n";
+}
+
+void test_argmin_axis0() {
+    // axis=0 → per row, which col has the min
+    // row 0: min(3,1,4) → col 1
+    // row 1: min(1,5,2) → col 0
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    Matrix res = a.argmin(0);
+
+    assert(res.rows() == 2);
+    assert(res.cols() == 1);
+    assert(approx_eq(res(0, 0), 1.0));  // col 1
+    assert(approx_eq(res(1, 0), 0.0));  // col 0
+    std::cout << "PASS test_argmin_axis0\n";
+}
+
+void test_argmin_axis1() {
+    // axis=1 → per col, which row has the min
+    // col 0: min(3,1) → row 1
+    // col 1: min(1,5) → row 0
+    // col 2: min(4,2) → row 1
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    Matrix res = a.argmin(1);
+
+    assert(res.rows() == 1);
+    assert(res.cols() == 3);
+    assert(approx_eq(res(0, 0), 1.0));  // row 1
+    assert(approx_eq(res(0, 1), 0.0));  // row 0
+    assert(approx_eq(res(0, 2), 1.0));  // row 1
+    std::cout << "PASS test_argmin_axis1\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -584,6 +709,17 @@ int main() {
     test_hstack_throws_on_row_mismatch();
     test_vstack();
     test_vstack_throws_on_col_mismatch();
+    test_argmax_flat();
+    test_argmax_flat_first_element();
+    test_argmax_flat_last_element();
+    test_argmin_flat();
+    test_argmin_flat_first_element();
+    test_argmin_flat_last_element();
+    test_argmax_axis0();
+    test_argmax_axis0_first_col();
+    test_argmax_axis1();
+    test_argmin_axis0();
+    test_argmin_axis1();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }
