@@ -4,6 +4,7 @@
  */
 
 #include "../include/matrix.hpp"
+#include <iostream>
 #include <cassert>
 #include <cmath>
 

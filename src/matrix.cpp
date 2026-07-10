@@ -431,7 +431,7 @@ void Matrix::fill(double value) {
     }
 }
 
-Matrix Matrix::clip(double min, double max) {
+Matrix Matrix::clip(double min, double max) const {
     Matrix res = *this;
     if (min > max)
         throw std::runtime_error("Minimum value less than maximum value\n");
@@ -447,7 +447,7 @@ Matrix Matrix::clip(double min, double max) {
     return res;
 }
 
-Matrix Matrix::reshape(double row, double col) const {
+Matrix Matrix::reshape(size_t row, size_t col) const {
     if (row * col != rows_ * cols_) 
         throw std::runtime_error("Reshape size mistmatch - element count must match\n");
 
@@ -591,6 +591,95 @@ Matrix Matrix::argmin(int axis) const {
     }
 }
 
+//==============================
+// Solvers
+//==============================
+void Matrix::swap_rows(size_t r1, size_t r2) {
+    if (r1 == r2) 
+        return;
+    for (size_t c = 0; c < cols_; c++) {
+        std::swap(data_[r1 * cols_ + c], data_[r2 * cols_ + c]);
+    }
+}
+
+LUResult Matrix::lu_decompose() const {
+    if (rows_ != cols_)
+        throw std::runtime_error("LU decomposition requires a square matrix\n");
+
+    LUResult lu;
+    lu.n        = rows_;
+    lu.data     = data_;  
+    lu.sign     = 1;
+    lu.singular = false;
+
+    for (size_t i = 0; i < rows_; i++)
+        lu.perm.push_back(i);
+
+    constexpr double EPSILON = 1e-9;
+
+    // lambda to index into lu.data as a 2D matrix
+    auto LU = [&](size_t r, size_t c) -> double& {
+        return lu.data[r * lu.n + c];
+    };
+
+    for (size_t k = 0; k < lu.n; k++) {
+        // find pivot with largest abs value in col k at or below row k
+        size_t cur_max_idx = k;
+        for (size_t r = k + 1; r < lu.n; r++)
+            if (std::abs(LU(r, k)) > std::abs(LU(cur_max_idx, k)))
+                cur_max_idx = r;
+
+        // swap rows in lu.data and perm if better pivot found
+        if (cur_max_idx != k) {
+            for (size_t c = 0; c < lu.n; c++)
+                std::swap(LU(k, c), LU(cur_max_idx, c));
+            std::swap(lu.perm[k], lu.perm[cur_max_idx]);
+            lu.sign *= -1;
+        }
+
+        // after best swap, if pivot still ~0 — singular
+        if (std::abs(LU(k, k)) < EPSILON) {
+            lu.singular = true;
+            return lu;
+        }
+
+        // elimination — zero out col k below diagonal
+        for (size_t i = k + 1; i < lu.n; i++) {
+            double factor = LU(i, k) / LU(k, k);
+            LU(i, k) = factor;                      // store L factor
+            for (size_t j = k + 1; j < lu.n; j++)
+                LU(i, j) -= factor * LU(k, j);      // update upper triangle
+        }
+    }
+    return lu;
+}
+
+// row i = row i - factor * row k
+void Matrix::row_saxpy(size_t i, size_t k, double factor) {
+    for (size_t c = 0; c < cols_; c++) {
+        // return elements across row i and row k
+        data_[i * cols_ + c] -= factor * data_[k * cols_ + c];
+    }
+}
+
+Matrix Matrix::inverse() const {}
+
+// det(A) = det(L) * det(U)
+double Matrix::determinant() const {
+    // auto lu = Matrix::lu_decompose();
+    // if (lu.singular)
+    //     return 0.0;
+    // // det(L) = 1
+    // double det = lu.sign;
+    // for (size_t i = 0; i < rows_; i++) {
+    //     det *= lu.U(i, i);
+    // }
+    // return det;
+}
+
+Matrix Matrix::solve(const Matrix& b) const {
+                   
+}
 //==============================
 // Output
 //==============================
