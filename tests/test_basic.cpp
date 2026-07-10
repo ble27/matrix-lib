@@ -670,6 +670,85 @@ void test_argmin_axis1() {
     std::cout << "PASS test_argmin_axis1\n";
 }
 
+void test_lu_decompose() {
+    Matrix A(2, 2, {4.0, 3.0,
+                    6.0, 3.0});
+
+    LUResult lu = A.lu_decompose();
+
+    assert(!lu.singular);
+    assert(lu.n == 2);
+    assert(lu.perm.size() == 2);
+    
+    // Pivoting verification
+    assert(lu.sign == -1);          // One swap occurred
+    assert(lu.perm[0] == 1);        // Row 0 is now old Row 1
+    assert(lu.perm[1] == 0);        // Row 1 is now old Row 0
+
+    // After swapping, the matrix processed was:
+    // [[6.0, 3.0],
+    //  [4.0, 3.0]]
+    // L factor = 4.0 / 6.0 = 2.0 / 3.0
+    // U(1,1)   = 3.0 - (2.0/3.0)*3.0 = 1.0
+
+    // Diagonal elements of U
+    assert(approx_eq(lu.data[0 * 2 + 0], 6.0));          // U(0,0) is now 6.0
+    assert(approx_eq(lu.data[1 * 2 + 1], 1.0));          // U(1,1) is now 1.0
+
+    // Below diagonal belongs to L
+    assert(approx_eq(lu.data[1 * 2 + 0], 2.0 / 3.0));    // L(1,0) factor
+
+    // Above diagonal belongs to U
+    assert(approx_eq(lu.data[0 * 2 + 1], 3.0));          // U(0,1)
+
+    std::cout << "PASS test_lu_decompose\n";
+}
+
+void test_lu_singular() {
+    // row 1 = 2 * row 0 — singular
+    Matrix A(2, 2, {1.0, 2.0,
+                    2.0, 4.0});
+    LUResult lu = A.lu_decompose();
+    assert(lu.singular);
+    std::cout << "PASS test_lu_singular\n";
+}
+
+void test_lu_non_square_throws() {
+    Matrix A(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    bool threw = false;
+    try {
+        LUResult lu = A.lu_decompose();
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_lu_non_square_throws\n";
+}
+
+void test_determinant_2x2() {
+    // det([[3, 8], [4, 6]]) = 3*6 - 8*4 = 18 - 32 = -14
+    Matrix A(2, 2, {3.0, 8.0,
+                    4.0, 6.0});
+    assert(approx_eq(A.determinant(), -14.0));
+    std::cout << "PASS test_determinant_2x2\n";
+}
+
+void test_determinant_identity() {
+    // det of identity is always 1
+    Matrix I = Matrix::identity(3);
+    assert(approx_eq(I.determinant(), 1.0));
+    std::cout << "PASS test_determinant_identity\n";
+}
+
+void test_determinant_singular() {
+    // singular matrix — det should be 0
+    Matrix A(2, 2, {1.0, 2.0,
+                    2.0, 4.0});
+    assert(approx_eq(A.determinant(), 0.0));
+    std::cout << "PASS test_determinant_singular\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -721,6 +800,12 @@ int main() {
     test_argmax_axis1();
     test_argmin_axis0();
     test_argmin_axis1();
+    test_lu_decompose();
+    test_lu_singular();
+    test_lu_non_square_throws();
+    test_determinant_2x2();
+    test_determinant_identity();
+    test_determinant_singular();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }

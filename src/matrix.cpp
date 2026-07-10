@@ -594,13 +594,6 @@ Matrix Matrix::argmin(int axis) const {
 //==============================
 // Solvers
 //==============================
-void Matrix::swap_rows(size_t r1, size_t r2) {
-    if (r1 == r2) 
-        return;
-    for (size_t c = 0; c < cols_; c++) {
-        std::swap(data_[r1 * cols_ + c], data_[r2 * cols_ + c]);
-    }
-}
 
 LUResult Matrix::lu_decompose() const {
     if (rows_ != cols_)
@@ -642,7 +635,7 @@ LUResult Matrix::lu_decompose() const {
             lu.singular = true;
             return lu;
         }
-
+    
         // elimination — zero out col k below diagonal
         for (size_t i = k + 1; i < lu.n; i++) {
             double factor = LU(i, k) / LU(k, k);
@@ -654,27 +647,24 @@ LUResult Matrix::lu_decompose() const {
     return lu;
 }
 
-// row i = row i - factor * row k
-void Matrix::row_saxpy(size_t i, size_t k, double factor) {
-    for (size_t c = 0; c < cols_; c++) {
-        // return elements across row i and row k
-        data_[i * cols_ + c] -= factor * data_[k * cols_ + c];
-    }
-}
-
 Matrix Matrix::inverse() const {}
 
-// det(A) = det(L) * det(U)
 double Matrix::determinant() const {
-    // auto lu = Matrix::lu_decompose();
-    // if (lu.singular)
-    //     return 0.0;
-    // // det(L) = 1
-    // double det = lu.sign;
-    // for (size_t i = 0; i < rows_; i++) {
-    //     det *= lu.U(i, i);
+    auto lu = Matrix::lu_decompose();
+
+    if (lu.singular)
+        return 0.0;
+
+    double det = static_cast<double>(lu.sign);
+
+    // det(A) = det(L) * det(U)
+    // for (size_t i = 0; i < lu.data.size(); i+=lu.n+1) {
+    //     det *= lu.data[i];
     // }
-    // return det;
+    for (size_t i = 0; i < lu.n; i++) {
+        det *= lu.data[i * lu.n + i];
+    }
+    return det;
 }
 
 Matrix Matrix::solve(const Matrix& b) const {
