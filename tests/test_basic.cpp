@@ -749,6 +749,66 @@ void test_determinant_singular() {
     std::cout << "PASS test_determinant_singular\n";
 }
 
+void test_inverse_2x2() {
+    // det = 4*6 - 7*2 = 24 - 14 = 10
+    // A_inv = (1/10) * [[ 6, -7],
+    //                   [-2,  4]]
+    //       = [[0.6, -0.7],
+    //          [-0.2, 0.4]]
+    Matrix A(2, 2, {4.0, 7.0,
+                    2.0, 6.0});
+
+    Matrix A_inv = A.inverse();
+
+    // check dimensions
+    assert(A_inv.rows() == 2);
+    assert(A_inv.cols() == 2);
+
+    // check known values from closed form
+    assert(approx_eq(A_inv(0, 0),  0.6));
+    assert(approx_eq(A_inv(0, 1), -0.7));
+    assert(approx_eq(A_inv(1, 0), -0.2));
+    assert(approx_eq(A_inv(1, 1),  0.4));
+
+    // verify A * A_inv = identity
+    Matrix result = A * A_inv;
+    assert(approx_eq(result(0, 0), 1.0));
+    assert(approx_eq(result(0, 1), 0.0));
+    assert(approx_eq(result(1, 0), 0.0));
+    assert(approx_eq(result(1, 1), 1.0));
+
+    std::cout << "PASS test_inverse_2x2\n";
+}
+
+void test_inverse_3x3() {
+    // same matrix from our LU walkthrough — det = 4
+    // don't compute inverse by hand, use A * A_inv = I property
+    Matrix A(3, 3, {2.0, 1.0, 1.0,
+                    4.0, 3.0, 3.0,
+                    8.0, 7.0, 9.0});
+
+    Matrix A_inv = A.inverse();
+
+    // check dimensions
+    assert(A_inv.rows() == 3);
+    assert(A_inv.cols() == 3);
+
+    // A * A_inv should be identity
+    Matrix I      = Matrix::identity(3);
+    Matrix result = A * A_inv;
+    for (size_t r = 0; r < 3; r++)
+        for (size_t c = 0; c < 3; c++)
+            assert(approx_eq(result(r, c), I(r, c)));
+
+    // A_inv * A should also be identity
+    Matrix result2 = A_inv * A;
+    for (size_t r = 0; r < 3; r++)
+        for (size_t c = 0; c < 3; c++)
+            assert(approx_eq(result2(r, c), I(r, c)));
+
+    std::cout << "PASS test_inverse_3x3\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -806,6 +866,8 @@ int main() {
     test_determinant_2x2();
     test_determinant_identity();
     test_determinant_singular();
+    test_inverse_2x2();
+    test_inverse_3x3();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }

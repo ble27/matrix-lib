@@ -647,20 +647,81 @@ LUResult Matrix::lu_decompose() const {
     return lu;
 }
 
-Matrix Matrix::inverse() const {}
+Matrix Matrix::inverse() const {
+    if (rows_ != cols_)
+        throw std::runtime_error("Matrix is not invertible due to dimension mismatch\n");
+
+    Matrix working = *this;
+    Matrix augmented = Matrix::identity(rows_);
+
+    // Forward elimination with partial pivoting
+    for (size_t k = 0; k < cols_; k++) {
+        // find the largest abs value in col r
+        size_t cur_max_row = k;
+        for (size_t r = k + 1; r < rows_; r++) {
+            if (std::abs(working(r, k)) > std::abs(working(cur_max_row, k)))
+                cur_max_row = r;
+        }
+
+        // swap both the working and augmented matrices if a larger absolute value was found
+        if (cur_max_row != k) {
+            for (size_t c = 0; c < working.cols() ; c++) {
+                std::swap(working(k, c), working(cur_max_row, c));
+                std::swap(augmented(k, c), augmented(cur_max_row, c));
+            }
+        }
+
+        double pv = working(k, k);
+        // guard against zero division
+        if (std::abs(pv) < 1e-9)
+            throw std::runtime_error("Matrix is singular\n");
+
+        // scale the pivot row to make diagonal exactly 1
+        for (size_t c = k; c < cols_; c++) {
+            working(k, c) /= pv;
+        }
+        for (size_t c = 0; c < cols_; c++) {
+            augmented(k, c) /= pv;
+        }
+
+        // eliminate the rows below
+        for (size_t r = k + 1; r < rows_; r++) {
+            double factor = working(r, k);
+            // update from the pivot col to the end across the row
+            for (size_t c = k; c < cols_; c++) {
+                working(r, c) -= factor * working(k, c);
+            }
+            // update the entire row for augmented
+            for (size_t c = 0; c < cols_; c++) {
+                augmented(r, c) -= factor * augmented(k, c);
+            }
+        }
+    }
+    // Backward elimination
+    for (int k = static_cast<int>(cols_) - 1; k >= 0; k--) {
+
+        // clear the rows above the pivot row
+        for (size_t r = 0; r < static_cast<size_t>(k); r++) {
+            // factor is always target row because pivot is 1
+            double factor = working(r, k);
+
+            // clear each column of that row for augmented
+            for (size_t c = 0; c < cols_; c++) {
+                augmented(r, c) -= factor * augmented(k, c);
+            }
+            // eliminate target cell
+            working(r, k) = 0.0;
+        }
+    }
+    return augmented;
+}
 
 double Matrix::determinant() const {
     auto lu = Matrix::lu_decompose();
-
     if (lu.singular)
         return 0.0;
-
+        
     double det = static_cast<double>(lu.sign);
-
-    // det(A) = det(L) * det(U)
-    // for (size_t i = 0; i < lu.data.size(); i+=lu.n+1) {
-    //     det *= lu.data[i];
-    // }
     for (size_t i = 0; i < lu.n; i++) {
         det *= lu.data[i * lu.n + i];
     }
