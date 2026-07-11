@@ -4,6 +4,7 @@
  */
 
 #include "../include/matrix.hpp"
+#include <iostream>
 #include <cassert>
 #include <cmath>
 
@@ -389,6 +390,524 @@ void test_identity() {
     assert(approx_eq(i(2, 2),  1.0));
     std::cout << "PASS test_identity\n";
 }
+
+void test_fill() {
+    Matrix i(2, 3);
+    i.fill(1);
+    assert(approx_eq(i(0, 0), 1.0));
+    assert(approx_eq(i(0, 1), 1.0));
+    assert(approx_eq(i(0, 2), 1.0));
+    assert(approx_eq(i(1, 0), 1.0));
+    assert(approx_eq(i(1, 1), 1.0));
+    assert(approx_eq(i(1, 2), 1.0));
+    std::cout << "PASS test_fill\n";
+}
+
+void test_clip() {
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix b = a.clip(2, 4);
+    assert(approx_eq(b(0, 0), 2.0));
+    assert(approx_eq(b(0, 1), 2.0));
+    assert(approx_eq(b(0, 2), 3.0));
+    assert(approx_eq(b(1, 0), 4.0));
+    assert(approx_eq(b(1, 1), 4.0));
+    assert(approx_eq(b(1, 2), 4.0));
+    std::cout << "PASS test_clip\n";
+}
+
+void test_reshape() {
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix b = a.reshape(1, 6);
+    assert(approx_eq(b(0, 0), 1.0));
+    assert(approx_eq(b(0, 1), 2.0));
+    assert(approx_eq(b(0, 2), 3.0));
+    assert(approx_eq(b(0, 3), 4.0));
+    assert(approx_eq(b(0, 4), 5.0));
+    assert(approx_eq(b(0, 5), 6.0));
+    std::cout << "PASS test_reshape\n";
+}
+
+void test_flatten() {
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix b = a.flatten();
+    assert(approx_eq(b(0, 0), 1.0));
+    assert(approx_eq(b(0, 1), 2.0));
+    assert(approx_eq(b(0, 2), 3.0));
+    assert(approx_eq(b(0, 3), 4.0));
+    assert(approx_eq(b(0, 4), 5.0));
+    assert(approx_eq(b(0, 5), 6.0));
+    std::cout << "PASS test_flatten\n";
+}
+
+void test_hstack() {
+    // A (2x2):    B (2x3):    expected (2x5):
+    // 1  2        5  6  7     1  2  5  6  7
+    // 3  4        8  9  10    3  4  8  9  10
+    Matrix A(2, 2, {1.0, 2.0,
+                    3.0, 4.0});
+    Matrix B(2, 3, {5.0,  6.0,  7.0,
+                    8.0,  9.0, 10.0});
+
+    Matrix res = Matrix::hstack(A, B);
+
+    // check dimensions
+    assert(res.rows() == 2);
+    assert(res.cols() == 5);
+
+    // check values — left side from A
+    assert(approx_eq(res(0, 0), 1.0));
+    assert(approx_eq(res(0, 1), 2.0));
+    assert(approx_eq(res(1, 0), 3.0));
+    assert(approx_eq(res(1, 1), 4.0));
+
+    // check values — right side from B
+    assert(approx_eq(res(0, 2),  5.0));
+    assert(approx_eq(res(0, 3),  6.0));
+    assert(approx_eq(res(0, 4),  7.0));
+    assert(approx_eq(res(1, 2),  8.0));
+    assert(approx_eq(res(1, 3),  9.0));
+    assert(approx_eq(res(1, 4), 10.0));
+
+    std::cout << "PASS test_hstack\n";
+}
+
+void test_hstack_throws_on_row_mismatch() {
+    // different number of rows — should throw
+    Matrix A(2, 2, {1.0, 2.0, 3.0, 4.0});
+    Matrix B(3, 2, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
+
+    bool threw = false;
+    try {
+        Matrix res = Matrix::hstack(A, B);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_hstack_throws_on_row_mismatch\n";
+}
+
+void test_vstack() {
+    // A (2x3):    B (3x3):    expected (5x3):
+    // 1  2  3     7  8  9     1  2  3
+    // 4  5  6     10 11 12    4  5  6
+    //             13 14 15    7  8  9
+    //                         10 11 12
+    //                         13 14 15
+    Matrix A(2, 3, {1.0,  2.0,  3.0,
+                    4.0,  5.0,  6.0});
+    Matrix B(3, 3, {7.0,  8.0,  9.0,
+                    10.0, 11.0, 12.0,
+                    13.0, 14.0, 15.0});
+
+    Matrix res = Matrix::vstack(A, B);
+
+    // check dimensions
+    assert(res.rows() == 5);
+    assert(res.cols() == 3);
+
+    // check values — top from A
+    assert(approx_eq(res(0, 0), 1.0));
+    assert(approx_eq(res(0, 1), 2.0));
+    assert(approx_eq(res(0, 2), 3.0));
+    assert(approx_eq(res(1, 0), 4.0));
+    assert(approx_eq(res(1, 1), 5.0));
+    assert(approx_eq(res(1, 2), 6.0));
+
+    // check values — bottom from B
+    assert(approx_eq(res(2, 0),  7.0));
+    assert(approx_eq(res(2, 1),  8.0));
+    assert(approx_eq(res(2, 2),  9.0));
+    assert(approx_eq(res(3, 0), 10.0));
+    assert(approx_eq(res(3, 1), 11.0));
+    assert(approx_eq(res(3, 2), 12.0));
+    assert(approx_eq(res(4, 0), 13.0));
+    assert(approx_eq(res(4, 1), 14.0));
+    assert(approx_eq(res(4, 2), 15.0));
+
+    std::cout << "PASS test_vstack\n";
+}
+
+void test_vstack_throws_on_col_mismatch() {
+    // different number of cols — should throw
+    Matrix A(2, 3, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
+    Matrix B(2, 2, {1.0, 2.0, 3.0, 4.0});
+
+    bool threw = false;
+    try {
+        Matrix res = Matrix::vstack(A, B);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_vstack_throws_on_col_mismatch\n";
+}
+
+void test_argmax_flat() {
+    // data_ = [3, 1, 4, 1, 5, 2]
+    // max = 5 at flat index 4
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    assert(a.argmax() == 4);
+    std::cout << "PASS test_argmax_flat\n";
+}
+
+void test_argmax_flat_first_element() {
+    // max is at index 0 — tests that initialization to idx=0 is correct
+    Matrix a(2, 3, {9.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    assert(a.argmax() == 0);
+    std::cout << "PASS test_argmax_flat_first_element\n";
+}
+
+void test_argmax_flat_last_element() {
+    // max is at last index — tests the loop runs to the end
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 9.0});
+    assert(a.argmax() == 5);
+    std::cout << "PASS test_argmax_flat_last_element\n";
+}
+
+void test_argmin_flat() {
+    // data_ = [3, 1, 4, 1, 5, 2]
+    // min = 1 at flat index 1 (first occurrence)
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    assert(a.argmin() == 1);
+    std::cout << "PASS test_argmin_flat\n";
+}
+
+void test_argmin_flat_first_element() {
+    // min is at index 0
+    Matrix a(2, 3, {0.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    assert(a.argmin() == 0);
+    std::cout << "PASS test_argmin_flat_first_element\n";
+}
+
+void test_argmin_flat_last_element() {
+    // min is at last index
+    Matrix a(2, 3, {9.0, 8.0, 7.0,
+                    6.0, 5.0, 1.0});
+    assert(a.argmin() == 5);
+    std::cout << "PASS test_argmin_flat_last_element\n";
+}
+
+void test_argmax_axis0() {
+    // axis=0 → per row, which col has the max
+    // row 0: max(3,1,4) → col 2
+    // row 1: max(1,5,2) → col 1
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    Matrix res = a.argmax(0);
+
+    assert(res.rows() == 2);
+    assert(res.cols() == 1);
+    assert(approx_eq(res(0, 0), 2.0));  // col 2
+    assert(approx_eq(res(1, 0), 1.0));  // col 1
+    std::cout << "PASS test_argmax_axis0\n";
+}
+
+void test_argmax_axis0_first_col() {
+    // max is always in col 0 — tests initialization to best_col=0 is correct
+    Matrix a(2, 3, {9.0, 1.0, 2.0,
+                    8.0, 3.0, 4.0});
+    Matrix res = a.argmax(0);
+
+    assert(approx_eq(res(0, 0), 0.0));
+    assert(approx_eq(res(1, 0), 0.0));
+    std::cout << "PASS test_argmax_axis0_first_col\n";
+}
+
+void test_argmax_axis1() {
+    // axis=1 → per col, which row has the max
+    // col 0: max(3,1) → row 0
+    // col 1: max(1,5) → row 1
+    // col 2: max(4,2) → row 0
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    Matrix res = a.argmax(1);
+
+    assert(res.rows() == 1);
+    assert(res.cols() == 3);
+    assert(approx_eq(res(0, 0), 0.0));  // row 0
+    assert(approx_eq(res(0, 1), 1.0));  // row 1
+    assert(approx_eq(res(0, 2), 0.0));  // row 0
+    std::cout << "PASS test_argmax_axis1\n";
+}
+
+void test_argmin_axis0() {
+    // axis=0 → per row, which col has the min
+    // row 0: min(3,1,4) → col 1
+    // row 1: min(1,5,2) → col 0
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    Matrix res = a.argmin(0);
+
+    assert(res.rows() == 2);
+    assert(res.cols() == 1);
+    assert(approx_eq(res(0, 0), 1.0));  // col 1
+    assert(approx_eq(res(1, 0), 0.0));  // col 0
+    std::cout << "PASS test_argmin_axis0\n";
+}
+
+void test_argmin_axis1() {
+    // axis=1 → per col, which row has the min
+    // col 0: min(3,1) → row 1
+    // col 1: min(1,5) → row 0
+    // col 2: min(4,2) → row 1
+    Matrix a(2, 3, {3.0, 1.0, 4.0,
+                    1.0, 5.0, 2.0});
+    Matrix res = a.argmin(1);
+
+    assert(res.rows() == 1);
+    assert(res.cols() == 3);
+    assert(approx_eq(res(0, 0), 1.0));  // row 1
+    assert(approx_eq(res(0, 1), 0.0));  // row 0
+    assert(approx_eq(res(0, 2), 1.0));  // row 1
+    std::cout << "PASS test_argmin_axis1\n";
+}
+
+void test_lu_decompose() {
+    Matrix A(2, 2, {4.0, 3.0,
+                    6.0, 3.0});
+
+    LUResult lu = A.lu_decompose();
+
+    assert(!lu.singular);
+    assert(lu.n == 2);
+    assert(lu.perm.size() == 2);
+    
+    // Pivoting verification
+    assert(lu.sign == -1);          // One swap occurred
+    assert(lu.perm[0] == 1);        // Row 0 is now old Row 1
+    assert(lu.perm[1] == 0);        // Row 1 is now old Row 0
+
+    // After swapping, the matrix processed was:
+    // [[6.0, 3.0],
+    //  [4.0, 3.0]]
+    // L factor = 4.0 / 6.0 = 2.0 / 3.0
+    // U(1,1)   = 3.0 - (2.0/3.0)*3.0 = 1.0
+
+    // Diagonal elements of U
+    assert(approx_eq(lu.data[0 * 2 + 0], 6.0));          // U(0,0) is now 6.0
+    assert(approx_eq(lu.data[1 * 2 + 1], 1.0));          // U(1,1) is now 1.0
+
+    // Below diagonal belongs to L
+    assert(approx_eq(lu.data[1 * 2 + 0], 2.0 / 3.0));    // L(1,0) factor
+
+    // Above diagonal belongs to U
+    assert(approx_eq(lu.data[0 * 2 + 1], 3.0));          // U(0,1)
+
+    std::cout << "PASS test_lu_decompose\n";
+}
+
+void test_lu_singular() {
+    // row 1 = 2 * row 0 — singular
+    Matrix A(2, 2, {1.0, 2.0,
+                    2.0, 4.0});
+    LUResult lu = A.lu_decompose();
+    assert(lu.singular);
+    std::cout << "PASS test_lu_singular\n";
+}
+
+void test_lu_non_square_throws() {
+    Matrix A(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    bool threw = false;
+    try {
+        LUResult lu = A.lu_decompose();
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_lu_non_square_throws\n";
+}
+
+void test_determinant_2x2() {
+    // det([[3, 8], [4, 6]]) = 3*6 - 8*4 = 18 - 32 = -14
+    Matrix A(2, 2, {3.0, 8.0,
+                    4.0, 6.0});
+    assert(approx_eq(A.determinant(), -14.0));
+    std::cout << "PASS test_determinant_2x2\n";
+}
+
+void test_determinant_identity() {
+    // det of identity is always 1
+    Matrix I = Matrix::identity(3);
+    assert(approx_eq(I.determinant(), 1.0));
+    std::cout << "PASS test_determinant_identity\n";
+}
+
+void test_determinant_singular() {
+    // singular matrix — det should be 0
+    Matrix A(2, 2, {1.0, 2.0,
+                    2.0, 4.0});
+    assert(approx_eq(A.determinant(), 0.0));
+    std::cout << "PASS test_determinant_singular\n";
+}
+
+void test_inverse_2x2() {
+    // det = 4*6 - 7*2 = 24 - 14 = 10
+    // A_inv = (1/10) * [[ 6, -7],
+    //                   [-2,  4]]
+    //       = [[0.6, -0.7],
+    //          [-0.2, 0.4]]
+    Matrix A(2, 2, {4.0, 7.0,
+                    2.0, 6.0});
+
+    Matrix A_inv = A.inverse();
+
+    // check dimensions
+    assert(A_inv.rows() == 2);
+    assert(A_inv.cols() == 2);
+
+    // check known values from closed form
+    assert(approx_eq(A_inv(0, 0),  0.6));
+    assert(approx_eq(A_inv(0, 1), -0.7));
+    assert(approx_eq(A_inv(1, 0), -0.2));
+    assert(approx_eq(A_inv(1, 1),  0.4));
+
+    // verify A * A_inv = identity
+    Matrix result = A * A_inv;
+    assert(approx_eq(result(0, 0), 1.0));
+    assert(approx_eq(result(0, 1), 0.0));
+    assert(approx_eq(result(1, 0), 0.0));
+    assert(approx_eq(result(1, 1), 1.0));
+
+    std::cout << "PASS test_inverse_2x2\n";
+}
+
+void test_inverse_3x3() {
+    // same matrix from our LU walkthrough — det = 4
+    // don't compute inverse by hand, use A * A_inv = I property
+    Matrix A(3, 3, {2.0, 1.0, 1.0,
+                    4.0, 3.0, 3.0,
+                    8.0, 7.0, 9.0});
+
+    Matrix A_inv = A.inverse();
+
+    // check dimensions
+    assert(A_inv.rows() == 3);
+    assert(A_inv.cols() == 3);
+
+    // A * A_inv should be identity
+    Matrix I      = Matrix::identity(3);
+    Matrix result = A * A_inv;
+    for (size_t r = 0; r < 3; r++)
+        for (size_t c = 0; c < 3; c++)
+            assert(approx_eq(result(r, c), I(r, c)));
+
+    // A_inv * A should also be identity
+    Matrix result2 = A_inv * A;
+    for (size_t r = 0; r < 3; r++)
+        for (size_t c = 0; c < 3; c++)
+            assert(approx_eq(result2(r, c), I(r, c)));
+
+    std::cout << "PASS test_inverse_3x3\n";
+}
+
+void test_solve_2x2() {
+    // 2x0 + x1  = 5
+    // 5x0 + 3x1 = 13
+    // solution: x0 = 2, x1 = 1
+    Matrix A(2, 2, {2.0, 1.0,
+                    5.0, 3.0});
+    Matrix b(2, 1, {5.0,
+                    13.0});
+
+    Matrix x = A.solve(b);
+
+    assert(x.rows() == 2);
+    assert(x.cols() == 1);
+    assert(approx_eq(x(0, 0), 2.0));
+    assert(approx_eq(x(1, 0), 1.0));
+
+    // verify by plugging back in: A*x should equal b
+    Matrix Ax = A * x;
+    assert(approx_eq(Ax(0, 0),  5.0));
+    assert(approx_eq(Ax(1, 0), 13.0));
+
+    std::cout << "PASS test_solve_2x2\n";
+}
+
+void test_solve_3x3() {
+    // use our walkthrough matrix — det = 4 so not singular
+    // A*x = b where b = [4, 8, 12]
+    // verify by checking A*x = b rather than known x values
+    Matrix A(3, 3, {2.0, 1.0, 1.0,
+                    4.0, 3.0, 3.0,
+                    8.0, 7.0, 9.0});
+    Matrix b(3, 1, {4.0,
+                    8.0,
+                    12.0});
+
+    Matrix x = A.solve(b);
+
+    assert(x.rows() == 3);
+    assert(x.cols() == 1);
+
+    // plug back in — A*x should equal b
+    Matrix Ax = A * x;
+    assert(approx_eq(Ax(0, 0),  4.0));
+    assert(approx_eq(Ax(1, 0),  8.0));
+    assert(approx_eq(Ax(2, 0), 12.0));
+
+    std::cout << "PASS test_solve_3x3\n";
+}
+
+void test_solve_identity() {
+    // I*x = b should give x = b
+    Matrix I = Matrix::identity(3);
+    Matrix b(3, 1, {3.0,
+                    7.0,
+                    2.0});
+
+    Matrix x = I.solve(b);
+
+    assert(approx_eq(x(0, 0), 3.0));
+    assert(approx_eq(x(1, 0), 7.0));
+    assert(approx_eq(x(2, 0), 2.0));
+
+    std::cout << "PASS test_solve_identity\n";
+}
+
+void test_solve_singular_throws() {
+    // singular matrix — no unique solution, should throw
+    Matrix A(2, 2, {1.0, 2.0,
+                    2.0, 4.0});
+    Matrix b(2, 1, {1.0,
+                    2.0});
+
+    bool threw = false;
+    try {
+        Matrix x = A.solve(b);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_solve_singular_throws\n";
+}
+
+void test_solve_wrong_b_throws() {
+    // b has wrong number of rows
+    Matrix A(3, 3, {1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0});
+    Matrix b(2, 1, {1.0, 2.0});  // wrong size
+
+    bool threw = false;
+    try {
+        Matrix x = A.solve(b);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_solve_wrong_b_throws\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -421,6 +940,38 @@ int main() {
     test_zeros();
     test_ones();
     test_identity();
-    std::cout << "\nAll tests passed.\n";
+    test_fill();
+    test_clip();
+    test_reshape();
+    test_flatten();
+    test_hstack();
+    test_hstack_throws_on_row_mismatch();
+    test_vstack();
+    test_vstack_throws_on_col_mismatch();
+    test_argmax_flat();
+    test_argmax_flat_first_element();
+    test_argmax_flat_last_element();
+    test_argmin_flat();
+    test_argmin_flat_first_element();
+    test_argmin_flat_last_element();
+    test_argmax_axis0();
+    test_argmax_axis0_first_col();
+    test_argmax_axis1();
+    test_argmin_axis0();
+    test_argmin_axis1();
+    test_lu_decompose();
+    test_lu_singular();
+    test_lu_non_square_throws();
+    test_determinant_2x2();
+    test_determinant_identity();
+    test_determinant_singular();
+    test_inverse_2x2();
+    test_inverse_3x3();
+    test_solve_2x2();
+    test_solve_3x3();
+    test_solve_identity();
+    test_solve_singular_throws();
+    test_solve_wrong_b_throws();
+        std::cout << "\nAll tests passed.\n";
     return 0;
 }
