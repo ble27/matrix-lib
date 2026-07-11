@@ -809,6 +809,105 @@ void test_inverse_3x3() {
     std::cout << "PASS test_inverse_3x3\n";
 }
 
+void test_solve_2x2() {
+    // 2x0 + x1  = 5
+    // 5x0 + 3x1 = 13
+    // solution: x0 = 2, x1 = 1
+    Matrix A(2, 2, {2.0, 1.0,
+                    5.0, 3.0});
+    Matrix b(2, 1, {5.0,
+                    13.0});
+
+    Matrix x = A.solve(b);
+
+    assert(x.rows() == 2);
+    assert(x.cols() == 1);
+    assert(approx_eq(x(0, 0), 2.0));
+    assert(approx_eq(x(1, 0), 1.0));
+
+    // verify by plugging back in: A*x should equal b
+    Matrix Ax = A * x;
+    assert(approx_eq(Ax(0, 0),  5.0));
+    assert(approx_eq(Ax(1, 0), 13.0));
+
+    std::cout << "PASS test_solve_2x2\n";
+}
+
+void test_solve_3x3() {
+    // use our walkthrough matrix — det = 4 so not singular
+    // A*x = b where b = [4, 8, 12]
+    // verify by checking A*x = b rather than known x values
+    Matrix A(3, 3, {2.0, 1.0, 1.0,
+                    4.0, 3.0, 3.0,
+                    8.0, 7.0, 9.0});
+    Matrix b(3, 1, {4.0,
+                    8.0,
+                    12.0});
+
+    Matrix x = A.solve(b);
+
+    assert(x.rows() == 3);
+    assert(x.cols() == 1);
+
+    // plug back in — A*x should equal b
+    Matrix Ax = A * x;
+    assert(approx_eq(Ax(0, 0),  4.0));
+    assert(approx_eq(Ax(1, 0),  8.0));
+    assert(approx_eq(Ax(2, 0), 12.0));
+
+    std::cout << "PASS test_solve_3x3\n";
+}
+
+void test_solve_identity() {
+    // I*x = b should give x = b
+    Matrix I = Matrix::identity(3);
+    Matrix b(3, 1, {3.0,
+                    7.0,
+                    2.0});
+
+    Matrix x = I.solve(b);
+
+    assert(approx_eq(x(0, 0), 3.0));
+    assert(approx_eq(x(1, 0), 7.0));
+    assert(approx_eq(x(2, 0), 2.0));
+
+    std::cout << "PASS test_solve_identity\n";
+}
+
+void test_solve_singular_throws() {
+    // singular matrix — no unique solution, should throw
+    Matrix A(2, 2, {1.0, 2.0,
+                    2.0, 4.0});
+    Matrix b(2, 1, {1.0,
+                    2.0});
+
+    bool threw = false;
+    try {
+        Matrix x = A.solve(b);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_solve_singular_throws\n";
+}
+
+void test_solve_wrong_b_throws() {
+    // b has wrong number of rows
+    Matrix A(3, 3, {1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0});
+    Matrix b(2, 1, {1.0, 2.0});  // wrong size
+
+    bool threw = false;
+    try {
+        Matrix x = A.solve(b);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_solve_wrong_b_throws\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -868,6 +967,11 @@ int main() {
     test_determinant_singular();
     test_inverse_2x2();
     test_inverse_3x3();
-    std::cout << "\nAll tests passed.\n";
+    test_solve_2x2();
+    test_solve_3x3();
+    test_solve_identity();
+    test_solve_singular_throws();
+    test_solve_wrong_b_throws();
+        std::cout << "\nAll tests passed.\n";
     return 0;
 }

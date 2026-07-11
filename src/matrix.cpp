@@ -687,6 +687,7 @@ Matrix Matrix::inverse() const {
         // eliminate the rows below
         for (size_t r = k + 1; r < rows_; r++) {
             double factor = working(r, k);
+
             // update from the pivot col to the end across the row
             for (size_t c = k; c < cols_; c++) {
                 working(r, c) -= factor * working(k, c);
@@ -720,7 +721,7 @@ double Matrix::determinant() const {
     auto lu = Matrix::lu_decompose();
     if (lu.singular)
         return 0.0;
-        
+
     double det = static_cast<double>(lu.sign);
     for (size_t i = 0; i < lu.n; i++) {
         det *= lu.data[i * lu.n + i];
@@ -728,9 +729,58 @@ double Matrix::determinant() const {
     return det;
 }
 
+// PA = LU method
 Matrix Matrix::solve(const Matrix& b) const {
-                   
+    if (rows_ != cols_)
+        throw std::runtime_error("Solve requires a square matrix\n");
+    if (b.rows() != rows_ || b.cols() != 1)
+        throw std::runtime_error("Matrix b must be a column vector of matching size\n");
+
+    auto lu = lu_decompose();
+
+    if (lu.singular) 
+        throw std::runtime_error("Matrix is singular - unable to solve the system\n");
+
+    std::vector<double> pb(b.data_.size());
+
+    // pb = permuation vector from lu applied on b
+    for (size_t i = 0; i < b.data_.size(); i++) {
+        pb[i] = b.data_[lu.perm[i]];
+    }
+
+    std::vector<double> y(lu.n);
+    // forward substitution (Ly = pb, where y = Ux)
+    for (size_t i = 0; i < lu.n; i++) {
+        y[i] = pb[i];
+        // [1 0 0]   [x0]
+        // [1 2 0] * [x1]
+        // [1 2 3]   [x2]
+        for (size_t j = 0; j < i; j++) {
+            y[i] -= lu.data[i * lu.n + j] * y[j];
+        }
+    }
+
+    // backward substitution (Ux = y)
+    // subtract from i + 1 and divide by i, i
+    std::vector<double> x(lu.n);
+    for (int i = static_cast<int>(lu.n) - 1; i >= 0; i--) {
+        x[i] = y[i];
+        // [8 7 9]   [x0]   y0
+        // [0 1 2] * [x1] = y1
+        // [0 0 1]   [x2]   y2
+        for (size_t j = static_cast<size_t>(i) + 1; j < lu.n; j++) {
+            x[i] -= lu.data[i * lu.n + j] * x[j];
+        }
+        x[i] /= lu.data[i * lu.n + i];
+    }
+
+    Matrix res(b.rows(), 1);
+    for (size_t i = 0; i < x.size(); i++) {
+        res.data_[i] = x[i];
+    }
+    return res;
 }
+
 //==============================
 // Output
 //==============================
