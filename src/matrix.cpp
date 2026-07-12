@@ -1037,8 +1037,25 @@ Matrix Matrix::relu_derivative() const {
     return res;
 }
 
-// Matrix Matrix::sigmoid() const {}
-// Matrix Matrix::sigmoid_derivative() const {}
+Matrix Matrix::sigmoid() const {
+    // Element is computed as followed: 1 / (1 + e^-x)
+    Matrix res = *this;
+    for (size_t i = 0; i < res.data_.size(); i++) {
+        res.data_[i] = 1 / (1 + std::exp(-res.data_[i]));
+    }
+    return res;
+}
+
+Matrix Matrix::sigmoid_derivative() const {
+    // sigmoid derivative = sigmoid * (1 - sigmoid) from chain rule
+    Matrix sigmoid = this->sigmoid();
+    Matrix res = sigmoid;
+    for (size_t i = 0; i < sigmoid.data_.size(); i++) {
+        res.data_[i] = sigmoid.data_[i] * (1 - sigmoid.data_[i]);
+    }
+    return res;
+
+}
 // Matrix Matrix::normalize(int axis) const {}
 // Matrix Matrix::pad(size_t top, size_t bottom, size_t left, size_t right) const {}
 //==============================

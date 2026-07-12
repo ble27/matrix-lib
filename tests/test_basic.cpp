@@ -1416,50 +1416,50 @@ void test_relu_derivative() {
 // // sigmoid tests
 // //==============================
 
-// void test_sigmoid_known_values() {
-//     // sigmoid(0) = 0.5 exactly
-//     // sigmoid(large positive) → 1
-//     // sigmoid(large negative) → 0
-//     Matrix a(1, 3, {0.0, 10.0, -10.0});
-//     Matrix res = a.sigmoid();
+void test_sigmoid_known_values() {
+    // sigmoid(0) = 0.5 exactly
+    // sigmoid(large positive) → 1
+    // sigmoid(large negative) → 0
+    Matrix a(1, 3, {0.0, 10.0, -10.0});
+    Matrix res = a.sigmoid();
 
-//     assert(approx_eq(res(0, 0), 0.5));
-//     assert(approx_eq(res(0, 1), 1.0, 1e-4));   // very close to 1
-//     assert(approx_eq(res(0, 2), 0.0, 1e-4));   // very close to 0
-//     std::cout << "PASS test_sigmoid_known_values\n";
-// }
+    assert(approx_eq(res(0, 0), 0.5));
+    assert(approx_eq(res(0, 1), 1.0, 1e-4));   // very close to 1
+    assert(approx_eq(res(0, 2), 0.0, 1e-4));   // very close to 0
+    std::cout << "PASS test_sigmoid_known_values\n";
+}
 
-// void test_sigmoid_output_range() {
-//     // all outputs must be strictly between 0 and 1
-//     Matrix a(2, 3, {-5.0, -1.0,  0.0,
-//                      1.0,  5.0, 10.0});
-//     Matrix res = a.sigmoid();
+void test_sigmoid_output_range() {
+    // all outputs must be strictly between 0 and 1
+    Matrix a(2, 3, {-5.0, -1.0,  0.0,
+                     1.0,  5.0, 10.0});
+    Matrix res = a.sigmoid();
 
-//     for (size_t r = 0; r < 2; r++)
-//         for (size_t c = 0; c < 3; c++) {
-//             assert(res(r, c) > 0.0);
-//             assert(res(r, c) < 1.0);
-//         }
-//     std::cout << "PASS test_sigmoid_output_range\n";
-// }
+    for (size_t r = 0; r < 2; r++)
+        for (size_t c = 0; c < 3; c++) {
+            assert(res(r, c) > 0.0);
+            assert(res(r, c) < 1.0);
+        }
+    std::cout << "PASS test_sigmoid_output_range\n";
+}
 
-// void test_sigmoid_derivative() {
-//     // sigmoid_derivative(x) = sigmoid(x) * (1 - sigmoid(x))
-//     // at x=0: sigmoid(0) = 0.5, derivative = 0.5 * 0.5 = 0.25
-//     Matrix a(1, 1, {0.0});
-//     Matrix res = a.sigmoid_derivative();
-//     assert(approx_eq(res(0, 0), 0.25));
-//     std::cout << "PASS test_sigmoid_derivative\n";
-// }
+void test_sigmoid_derivative() {
+    // sigmoid_derivative(x) = sigmoid(x) * (1 - sigmoid(x))
+    // at x=0: sigmoid(0) = 0.5, derivative = 0.5 * 0.5 = 0.25
+    Matrix a(1, 1, {0.0});
+    Matrix res = a.sigmoid_derivative();
+    assert(approx_eq(res(0, 0), 0.25));
+    std::cout << "PASS test_sigmoid_derivative\n";
+}
 
-// void test_sigmoid_does_not_modify_original() {
-//     Matrix a(2, 2, {1.0, 2.0,
-//                     3.0, 4.0});
-//     Matrix res = a.sigmoid();
-//     assert(approx_eq(a(0, 0), 1.0));
-//     assert(approx_eq(a(1, 1), 4.0));
-//     std::cout << "PASS test_sigmoid_does_not_modify_original\n";
-// }
+void test_sigmoid_does_not_modify_original() {
+    Matrix a(2, 2, {1.0, 2.0,
+                    3.0, 4.0});
+    Matrix res = a.sigmoid();
+    assert(approx_eq(a(0, 0), 1.0));
+    assert(approx_eq(a(1, 1), 4.0));
+    std::cout << "PASS test_sigmoid_does_not_modify_original\n";
+}
 
 //==============================
 // set_row / set_col tests
@@ -1740,7 +1740,10 @@ int main() {
     test_relu();
     test_relu_does_not_modify_original();
     test_relu_derivative();
-
+    test_sigmoid_known_values();
+    test_sigmoid_output_range();
+    test_sigmoid_derivative();
+    test_sigmoid_does_not_modify_original();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }
