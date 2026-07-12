@@ -908,6 +908,208 @@ void test_solve_wrong_b_throws() {
     std::cout << "PASS test_solve_wrong_b_throws\n";
 }
 
+void test_random_dimensions() {
+    // check shape and that values are within range
+    Matrix r = Matrix::random(3, 4, 0.0, 1.0);
+    assert(r.rows() == 3);
+    assert(r.cols() == 4);
+
+    // every element should be within [low, high]
+    for (size_t i = 0; i < r.rows(); i++)
+        for (size_t j = 0; j < r.cols(); j++) {
+            assert(r(i, j) >= 0.0);
+            assert(r(i, j) <= 1.0);
+        }
+    std::cout << "PASS test_random_dimensions\n";
+}
+
+void test_random_custom_range() {
+    // values should be within [-1, 1]
+    Matrix r = Matrix::random(10, 10, -1.0, 1.0);
+    for (size_t i = 0; i < r.rows(); i++)
+        for (size_t j = 0; j < r.cols(); j++) {
+            assert(r(i, j) >= -1.0);
+            assert(r(i, j) <=  1.0);
+        }
+    std::cout << "PASS test_random_custom_range\n";
+}
+
+void test_random_not_all_same() {
+    // two random matrices of same size should not be identical
+    // probability of collision is astronomically small
+    Matrix a = Matrix::random(4, 4, 0.0, 1.0);
+    Matrix b = Matrix::random(4, 4, 0.0, 1.0);
+    assert(a != b);
+    std::cout << "PASS test_random_not_all_same\n";
+}
+
+//==============================
+
+void test_outer_product() {
+    // col = [[2],   row = [[3, 4, 5]]
+    //        [3]]
+    //
+    // outer = [[2*3, 2*4, 2*5],   = [[6,  8,  10],
+    //          [3*3, 3*4, 3*5]]      [9, 12,  15]]
+    Matrix col(2, 1, {2.0, 3.0});
+    Matrix row(1, 3, {3.0, 4.0, 5.0});
+
+    Matrix res = Matrix::outer_product(col, row);
+
+    assert(res.rows() == 2);
+    assert(res.cols() == 3);
+
+    assert(approx_eq(res(0, 0),  6.0));
+    assert(approx_eq(res(0, 1),  8.0));
+    assert(approx_eq(res(0, 2), 10.0));
+    assert(approx_eq(res(1, 0),  9.0));
+    assert(approx_eq(res(1, 1), 12.0));
+    assert(approx_eq(res(1, 2), 15.0));
+
+    std::cout << "PASS test_outer_product\n";
+}
+
+void test_outer_product_wrong_shape_throws() {
+    // col must be n x 1, row must be 1 x m
+    Matrix a(2, 2, {1.0, 2.0, 3.0, 4.0});  // not a column vector
+    Matrix b(1, 2, {1.0, 2.0});
+
+    bool threw = false;
+    try {
+        Matrix res = Matrix::outer_product(a, b);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_outer_product_wrong_shape_throws\n";
+}
+
+void test_outer_product_vs_matmul() {
+    // outer product of col * row should equal col matrix-multiplied by row
+    Matrix col(3, 1, {1.0, 2.0, 3.0});
+    Matrix row(1, 3, {4.0, 5.0, 6.0});
+
+    Matrix outer  = Matrix::outer_product(col, row);
+    Matrix matmul = col * row;
+
+    assert(outer == matmul);
+    std::cout << "PASS test_outer_product_vs_matmul\n";
+}
+
+//==============================
+
+void test_row_accessor() {
+    // extract row 1 from a 3x3
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+
+    Matrix r = A.row(1);
+
+    assert(r.rows() == 1);
+    assert(r.cols() == 3);
+    assert(approx_eq(r(0, 0), 4.0));
+    assert(approx_eq(r(0, 1), 5.0));
+    assert(approx_eq(r(0, 2), 6.0));
+
+    std::cout << "PASS test_row_accessor\n";
+}
+
+void test_row_accessor_first_row() {
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+
+    Matrix r = A.row(0);
+    assert(approx_eq(r(0, 0), 1.0));
+    assert(approx_eq(r(0, 1), 2.0));
+    assert(approx_eq(r(0, 2), 3.0));
+    std::cout << "PASS test_row_accessor_first_row\n";
+}
+
+void test_row_accessor_out_of_range_throws() {
+    Matrix A(2, 2, {1.0, 2.0, 3.0, 4.0});
+    bool threw = false;
+    try {
+        Matrix r = A.row(5);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_row_accessor_out_of_range_throws\n";
+}
+
+void test_col_accessor() {
+    // extract col 2 from a 3x3
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+
+    Matrix c = A.col(2);
+
+    assert(c.rows() == 3);
+    assert(c.cols() == 1);
+    assert(approx_eq(c(0, 0), 3.0));
+    assert(approx_eq(c(1, 0), 6.0));
+    assert(approx_eq(c(2, 0), 9.0));
+
+    std::cout << "PASS test_col_accessor\n";
+}
+
+void test_col_accessor_first_col() {
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+
+    Matrix c = A.col(0);
+    assert(approx_eq(c(0, 0), 1.0));
+    assert(approx_eq(c(1, 0), 4.0));
+    assert(approx_eq(c(2, 0), 7.0));
+    std::cout << "PASS test_col_accessor_first_col\n";
+}
+
+void test_col_accessor_out_of_range_throws() {
+    Matrix A(2, 2, {1.0, 2.0, 3.0, 4.0});
+    bool threw = false;
+    try {
+        Matrix c = A.col(5);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_col_accessor_out_of_range_throws\n";
+}
+
+//==============================
+
+void test_trace_square() {
+    // trace = sum of diagonal = 1 + 5 + 9 = 15
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+    assert(approx_eq(A.trace(), 15.0));
+    std::cout << "PASS test_trace_square\n";
+}
+
+void test_trace_identity() {
+    // trace of n x n identity = n
+    Matrix I = Matrix::identity(4);
+    assert(approx_eq(I.trace(), 4.0));
+    std::cout << "PASS test_trace_identity\n";
+}
+
+void test_trace_non_square_throws() {
+    Matrix A(2, 3, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
+    bool threw = false;
+    try {
+        double t = A.trace();
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_trace_non_square_throws\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -972,6 +1174,21 @@ int main() {
     test_solve_identity();
     test_solve_singular_throws();
     test_solve_wrong_b_throws();
-        std::cout << "\nAll tests passed.\n";
+    test_random_dimensions();
+    test_random_custom_range();
+    test_random_not_all_same();
+    test_outer_product();
+    test_outer_product_wrong_shape_throws();
+    test_outer_product_vs_matmul();
+    test_row_accessor();
+    test_row_accessor_first_row();
+    test_row_accessor_out_of_range_throws();
+    test_col_accessor();
+    test_col_accessor_first_col();
+    test_col_accessor_out_of_range_throws();
+    test_trace_square();
+    test_trace_identity();
+    test_trace_non_square_throws();
+    std::cout << "\nAll tests passed.\n";
     return 0;
 }

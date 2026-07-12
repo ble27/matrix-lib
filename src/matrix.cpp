@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include <optional>
+#include <random>
 
 //==============================
 // Constructors
@@ -779,6 +780,73 @@ Matrix Matrix::solve(const Matrix& b) const {
         res.data_[i] = x[i];
     }
     return res;
+}
+
+Matrix Matrix::random(size_t rows, size_t cols, double low, double high) {
+    if (low > high)
+        throw std::runtime_error("Minimum input is less than the maximum input\n");
+    // random seed
+    std::random_device rd;
+    // engine
+    std::mt19937 gen(rd());
+    // distribution range
+    std::uniform_real_distribution distr(low, high);
+
+    Matrix random(rows, cols);
+    for (size_t i = 0; i < random.data_.size(); i++) {
+        random.data_[i] = distr(gen);
+    }
+    return random;
+}
+
+Matrix Matrix::row(size_t r) const {
+    if (r >= rows_ || r < 0) 
+        throw std::runtime_error("Invalid row dimension\n");
+
+    Matrix res(1, cols_);
+    for (size_t i = 0; i < cols_; i++) {
+        res(0, i) = data_[r * cols_ + i];
+    }
+    return res;
+}
+
+Matrix Matrix::col(size_t c) const {
+    if (c >= cols_ || c < 0)
+        throw std::runtime_error("Invalid column dimension\n");
+
+    Matrix res(rows_, 1);
+    for (size_t i = 0; i < rows_; i++) {
+        res(i, 0) = data_[i * cols_ + c];
+    }
+    return res;
+}
+
+Matrix Matrix::outer_product(const Matrix& col, const Matrix& row) {
+    if (col.cols() != 1)
+        throw std::runtime_error("Invalid column vector dimension\n");
+    if (row.rows() != 1)
+        throw std::runtime_error("Invalid row vector dimension\n");
+        
+    // Work only on 2 vectors
+    // This becomes uv^T ( u multiplied by v transposed ) or column vector * row vector
+    Matrix res(col.rows(), row.cols());
+    for (size_t r = 0; r < col.rows(); r++) {
+        for (size_t c = 0; c < row.cols(); c++) {
+            res(r, c) = col(r, 0) * row(0, c);
+        }
+    }    
+    return res;
+}
+
+double Matrix::trace() const {
+    if (rows_ != cols_)
+        throw std::runtime_error("Unable to compute the trace for non-square matrix\n");
+
+    double trace = 0.0;
+    for (size_t i = 0; i < data_.size(); i++) {
+        trace += data_[i * cols_ + i];
+    }
+    return trace;
 }
 
 //==============================

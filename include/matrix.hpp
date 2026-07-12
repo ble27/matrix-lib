@@ -11,6 +11,7 @@
 #include <tuple>
 #include <cmath>
 #include <string>
+#include <random>
 
 struct LUResult {
     std::vector<double> data;
@@ -42,6 +43,8 @@ class Matrix {
         [[nodiscard]] std::tuple<size_t, size_t> shape() const noexcept;
         [[nodiscard]] size_t rows() const noexcept { return rows_; }
         [[nodiscard]] size_t cols() const noexcept { return cols_; }
+        [[nodiscard]] Matrix row(size_t r) const;
+        [[nodiscard]] Matrix col(size_t c) const;
 
         //==============================
         // Element Access
@@ -72,6 +75,8 @@ class Matrix {
                     Matrix& operator/=(double scalar);
 
         [[nodiscard]] double dot(const Matrix& other) const;
+        [[nodiscard]] static Matrix outer_product(const Matrix& col, const Matrix& row);
+        [[nodiscard]] double trace() const;
 
         //==============================
         // Comparison
@@ -130,6 +135,7 @@ class Matrix {
         [[nodiscard]] static Matrix hstack(const Matrix& a, const Matrix& b);
         [[nodiscard]] static Matrix vstack(const Matrix& a, const Matrix& b);
         [[nodiscard]] static Matrix load(const std::string& filename);
+        [[nodiscard]] static Matrix random(size_t rows, size_t cols, double low = 0.0, double high = 1.0);
 
         //==============================
         // Utilities
