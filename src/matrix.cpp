@@ -1019,8 +1019,24 @@ bool Matrix::approx_equal(const Matrix& other, double tol) const {
     return true;
 }
 
-// Matrix Matrix::relu() const {}
-// Matrix Matrix::relu_derivative() const {}
+Matrix Matrix::relu() const {
+    // Element is itself if > 0 else 0
+    Matrix res = *this;
+    for (size_t i = 0; i < res.data_.size(); i++) {
+        res.data_[i] = (res.data_[i] > 0) ? res.data_[i] : 0;
+    }
+    return res;
+}
+
+Matrix Matrix::relu_derivative() const {
+    // Element is 1 if > 0 else 0
+    Matrix res = *this;
+    for (size_t i = 0; i < res.data_.size(); i++) {
+        res.data_[i] = (res.data_[i] > 0) ? 1 : 0;
+    }
+    return res;
+}
+
 // Matrix Matrix::sigmoid() const {}
 // Matrix Matrix::sigmoid_derivative() const {}
 // Matrix Matrix::normalize(int axis) const {}

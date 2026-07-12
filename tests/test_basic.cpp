@@ -1373,44 +1373,44 @@ void test_softmax_axis1() {
 // relu tests
 //==============================
 
-// void test_relu() {
-//     // negative values → 0, positive values → unchanged
-//     Matrix a(2, 3, {-3.0, -1.0,  0.0,
-//                      1.0,  2.0,  5.0});
-//     Matrix res = a.relu();
+void test_relu() {
+    // negative values → 0, positive values → unchanged
+    Matrix a(2, 3, {-3.0, -1.0,  0.0,
+                     1.0,  2.0,  5.0});
+    Matrix res = a.relu();
 
-//     assert(approx_eq(res(0, 0), 0.0));
-//     assert(approx_eq(res(0, 1), 0.0));
-//     assert(approx_eq(res(0, 2), 0.0));
-//     assert(approx_eq(res(1, 0), 1.0));
-//     assert(approx_eq(res(1, 1), 2.0));
-//     assert(approx_eq(res(1, 2), 5.0));
-//     std::cout << "PASS test_relu\n";
-// }
+    assert(approx_eq(res(0, 0), 0.0));
+    assert(approx_eq(res(0, 1), 0.0));
+    assert(approx_eq(res(0, 2), 0.0));
+    assert(approx_eq(res(1, 0), 1.0));
+    assert(approx_eq(res(1, 1), 2.0));
+    assert(approx_eq(res(1, 2), 5.0));
+    std::cout << "PASS test_relu\n";
+}
 
-// void test_relu_does_not_modify_original() {
-//     Matrix a(2, 2, {-1.0, 2.0,
-//                     -3.0, 4.0});
-//     Matrix res = a.relu();
-//     assert(approx_eq(a(0, 0), -1.0));
-//     assert(approx_eq(a(1, 0), -3.0));
-//     std::cout << "PASS test_relu_does_not_modify_original\n";
-// }
+void test_relu_does_not_modify_original() {
+    Matrix a(2, 2, {-1.0, 2.0,
+                    -3.0, 4.0});
+    Matrix res = a.relu();
+    assert(approx_eq(a(0, 0), -1.0));
+    assert(approx_eq(a(1, 0), -3.0));
+    std::cout << "PASS test_relu_does_not_modify_original\n";
+}
 
-// void test_relu_derivative() {
-//     // derivative: 1 where x > 0, 0 elsewhere
-//     Matrix a(2, 3, {-3.0, -1.0,  0.0,
-//                      1.0,  2.0,  5.0});
-//     Matrix res = a.relu_derivative();
+void test_relu_derivative() {
+    // derivative: 1 where x > 0, 0 elsewhere
+    Matrix a(2, 3, {-3.0, -1.0,  0.0,
+                     1.0,  2.0,  5.0});
+    Matrix res = a.relu_derivative();
 
-//     assert(approx_eq(res(0, 0), 0.0));
-//     assert(approx_eq(res(0, 1), 0.0));
-//     assert(approx_eq(res(0, 2), 0.0));  // 0 → derivative is 0
-//     assert(approx_eq(res(1, 0), 1.0));
-//     assert(approx_eq(res(1, 1), 1.0));
-//     assert(approx_eq(res(1, 2), 1.0));
-//     std::cout << "PASS test_relu_derivative\n";
-// }
+    assert(approx_eq(res(0, 0), 0.0));
+    assert(approx_eq(res(0, 1), 0.0));
+    assert(approx_eq(res(0, 2), 0.0));  // 0 → derivative is 0
+    assert(approx_eq(res(1, 0), 1.0));
+    assert(approx_eq(res(1, 1), 1.0));
+    assert(approx_eq(res(1, 2), 1.0));
+    std::cout << "PASS test_relu_derivative\n";
+}
 
 // //==============================
 // // sigmoid tests
@@ -1737,6 +1737,10 @@ int main() {
     test_approx_equal_outside_tolerance();
     test_approx_equal_custom_tolerance();
     test_approx_equal_different_shapes();
+    test_relu();
+    test_relu_does_not_modify_original();
+    test_relu_derivative();
+
     std::cout << "\nAll tests passed.\n";
     return 0;
 }
