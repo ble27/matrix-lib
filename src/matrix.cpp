@@ -945,6 +945,41 @@ Matrix Matrix::softmax(int axis) const {
     return res;
 }
 
+void Matrix::swap_rows(size_t r1, size_t r2) {
+    // Pass 0-based indices as params
+    if (r1 >= rows_ || r2 >= rows_) 
+        throw std::runtime_error("Invalid row index\n");
+    if (r1 == r2)
+        return;
+    // Move across column
+    for (size_t c = 0; c < cols_; c++) {
+        std::swap(data_[r1 * cols_ + c], data_[r2 * cols_ + c]);
+    }
+}
+
+void Matrix::swap_cols(size_t c1, size_t c2) {
+    // Pass 0-based index as params
+    if (c1 >= rows_ || c2 >= rows_) 
+        throw std::runtime_error("Invalid col index\n");
+    if (c1 == c2)
+        return;
+    // Move across row
+    for (size_t r = 0; r < rows_; r++) {
+        std::swap(data_[r * cols_ + c1], data_[r * cols_ + c2]);
+    }
+}
+
+void Matrix::set_row(size_t r, const Matrix& vec) {}
+void Matrix::set_col(size_t c, const Matrix& vec) {}
+Matrix Matrix::diag() const {}                    // extract diagonal → (n x 1)
+Matrix Matrix::diag(const Matrix& vec) {}  // vec → diagonal matrix
+bool Matrix::approx_equal(const Matrix& other, double tol = 1e-9) const {}
+Matrix Matrix::relu() const {}
+Matrix Matrix::relu_derivative() const {}
+Matrix Matrix::sigmoid() const {}
+Matrix Matrix::sigmoid_derivative() const {}
+Matrix Matrix::normalize(int axis) const {}
+Matrix Matrix::pad(size_t top, size_t bottom, size_t left, size_t right) const {}
 //==============================
 // Output
 //==============================

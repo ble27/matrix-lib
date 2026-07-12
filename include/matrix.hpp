@@ -43,6 +43,8 @@ class Matrix {
         [[nodiscard]] std::tuple<size_t, size_t> shape() const noexcept;
         [[nodiscard]] size_t rows() const noexcept { return rows_; }
         [[nodiscard]] size_t cols() const noexcept { return cols_; }
+
+        // Row/ Column accessor
         [[nodiscard]] Matrix row(size_t r) const;
         [[nodiscard]] Matrix col(size_t c) const;
 
@@ -143,7 +145,23 @@ class Matrix {
         //==============================
                       void fill(double value);
         [[nodiscard]] Matrix clip(double min_val, double max_val) const;
+
+        // To implement
                       void save(const std::string& filename) const;
+                      void swap_rows(size_t r1, size_t r2);
+                      void swap_cols(size_t c1, size_t c2);
+                      void set_row(size_t r, const Matrix& vec);
+                      void set_col(size_t c, const Matrix& vec);
+        [[nodiscard]] Matrix diag() const;                    // extract diagonal → (n x 1)
+        [[nodiscard]] static Matrix diag(const Matrix& vec);  // vec → diagonal matrix
+        [[nodiscard]] bool approx_equal(const Matrix& other, double tol = 1e-9) const;
+        [[nodiscard]] Matrix relu() const;
+        [[nodiscard]] Matrix relu_derivative() const;
+        [[nodiscard]] Matrix sigmoid() const;
+        [[nodiscard]] Matrix sigmoid_derivative() const;
+        [[nodiscard]] Matrix normalize(int axis) const;
+        [[nodiscard]] Matrix pad(size_t top, size_t bottom, size_t left, size_t right) const;
+
 
         //==============================
         // Linear Algebra
