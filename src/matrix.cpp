@@ -1008,7 +1008,17 @@ Matrix Matrix::diag(const Matrix& vec) {
     return res;
 }  
 
-// bool Matrix::approx_equal(const Matrix& other, double tol = 1e-9) const {}
+bool Matrix::approx_equal(const Matrix& other, double tol) const {
+    if ((*this).shape() != other.shape())
+        return false;
+
+    for (size_t i = 0; i < data_.size(); i++) {
+        if (std::abs(data_[i] - other.data_[i]) > tol)
+            return false;
+    }
+    return true;
+}
+
 // Matrix Matrix::relu() const {}
 // Matrix Matrix::relu_derivative() const {}
 // Matrix Matrix::sigmoid() const {}

@@ -1595,41 +1595,41 @@ void test_diag_non_square_throws() {
 // approx_equal tests
 //==============================
 
-// void test_approx_equal_identical() {
-//     Matrix a(2, 2, {1.0, 2.0, 3.0, 4.0});
-//     Matrix b(2, 2, {1.0, 2.0, 3.0, 4.0});
-//     assert(a.approx_equal(b));
-//     std::cout << "PASS test_approx_equal_identical\n";
-// }
+void test_approx_equal_identical() {
+    Matrix a(2, 2, {1.0, 2.0, 3.0, 4.0});
+    Matrix b(2, 2, {1.0, 2.0, 3.0, 4.0});
+    assert(a.approx_equal(b));
+    std::cout << "PASS test_approx_equal_identical\n";
+}
 
-// void test_approx_equal_within_tolerance() {
-//     Matrix a(1, 3, {1.0,     2.0,     3.0    });
-//     Matrix b(1, 3, {1.0+1e-10, 2.0-1e-10, 3.0+1e-10});
-//     assert(a.approx_equal(b));
-//     std::cout << "PASS test_approx_equal_within_tolerance\n";
-// }
+void test_approx_equal_within_tolerance() {
+    Matrix a(1, 3, {1.0,     2.0,     3.0    });
+    Matrix b(1, 3, {1.0+1e-10, 2.0-1e-10, 3.0+1e-10});
+    assert(a.approx_equal(b));
+    std::cout << "PASS test_approx_equal_within_tolerance\n";
+}
 
-// void test_approx_equal_outside_tolerance() {
-//     Matrix a(1, 2, {1.0, 2.0});
-//     Matrix b(1, 2, {1.1, 2.0});
-//     assert(!a.approx_equal(b));
-//     std::cout << "PASS test_approx_equal_outside_tolerance\n";
-// }
+void test_approx_equal_outside_tolerance() {
+    Matrix a(1, 2, {1.0, 2.0});
+    Matrix b(1, 2, {1.1, 2.0});
+    assert(!a.approx_equal(b));
+    std::cout << "PASS test_approx_equal_outside_tolerance\n";
+}
 
-// void test_approx_equal_custom_tolerance() {
-//     Matrix a(1, 2, {1.0, 2.0});
-//     Matrix b(1, 2, {1.05, 2.05});
-//     assert(!a.approx_equal(b, 1e-9));  // fails with tight tolerance
-//     assert( a.approx_equal(b, 0.1));   // passes with loose tolerance
-//     std::cout << "PASS test_approx_equal_custom_tolerance\n";
-// }
+void test_approx_equal_custom_tolerance() {
+    Matrix a(1, 2, {1.0, 2.0});
+    Matrix b(1, 2, {1.05, 2.05});
+    assert(!a.approx_equal(b, 1e-9));  // fails with tight tolerance
+    assert( a.approx_equal(b, 0.1));   // passes with loose tolerance
+    std::cout << "PASS test_approx_equal_custom_tolerance\n";
+}
 
-// void test_approx_equal_different_shapes() {
-//     Matrix a(2, 2, {1.0, 2.0, 3.0, 4.0});
-//     Matrix b(1, 4, {1.0, 2.0, 3.0, 4.0});
-//     assert(!a.approx_equal(b));
-//     std::cout << "PASS test_approx_equal_different_shapes\n";
-// }
+void test_approx_equal_different_shapes() {
+    Matrix a(2, 2, {1.0, 2.0, 3.0, 4.0});
+    Matrix b(1, 4, {1.0, 2.0, 3.0, 4.0});
+    assert(!a.approx_equal(b));
+    std::cout << "PASS test_approx_equal_different_shapes\n";
+}
 
 int main() {
     test_construction();
@@ -1732,6 +1732,11 @@ int main() {
     test_diag_extract();
     test_diag_construct();
     test_diag_non_square_throws();
+    test_approx_equal_identical();
+    test_approx_equal_within_tolerance();
+    test_approx_equal_outside_tolerance();
+    test_approx_equal_custom_tolerance();
+    test_approx_equal_different_shapes();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }
