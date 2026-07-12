@@ -1110,6 +1110,148 @@ void test_trace_non_square_throws() {
     std::cout << "PASS test_trace_non_square_throws\n";
 }
 
+void test_broadcast_add_axis0() {
+    // add row vector to every row
+    // A = [[1, 2, 3],     bias = [[10, 20, 30]]
+    //      [4, 5, 6],
+    //      [7, 8, 9]]
+    //
+    // result = [[11, 22, 33],
+    //           [14, 25, 36],
+    //           [17, 28, 39]]
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+    Matrix bias(1, 3, {10.0, 20.0, 30.0});
+
+    Matrix res = A.broadcast_add(bias, 0);
+
+    assert(res.rows() == 3);
+    assert(res.cols() == 3);
+
+    // row 0
+    assert(approx_eq(res(0, 0), 11.0));
+    assert(approx_eq(res(0, 1), 22.0));
+    assert(approx_eq(res(0, 2), 33.0));
+    // row 1
+    assert(approx_eq(res(1, 0), 14.0));
+    assert(approx_eq(res(1, 1), 25.0));
+    assert(approx_eq(res(1, 2), 36.0));
+    // row 2
+    assert(approx_eq(res(2, 0), 17.0));
+    assert(approx_eq(res(2, 1), 28.0));
+    assert(approx_eq(res(2, 2), 39.0));
+
+    std::cout << "PASS test_broadcast_add_axis0\n";
+}
+
+void test_broadcast_add_axis1() {
+    // add column vector to every column
+    // A = [[1, 2, 3],     bias = [[10],
+    //      [4, 5, 6],              [20],
+    //      [7, 8, 9]]              [30]]
+    //
+    // result = [[11, 12, 13],
+    //           [24, 25, 26],
+    //           [37, 38, 39]]
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+    Matrix bias(3, 1, {10.0, 20.0, 30.0});
+
+    Matrix res = A.broadcast_add(bias, 1);
+
+    assert(res.rows() == 3);
+    assert(res.cols() == 3);
+
+    // row 0
+    assert(approx_eq(res(0, 0), 11.0));
+    assert(approx_eq(res(0, 1), 12.0));
+    assert(approx_eq(res(0, 2), 13.0));
+    // row 1
+    assert(approx_eq(res(1, 0), 24.0));
+    assert(approx_eq(res(1, 1), 25.0));
+    assert(approx_eq(res(1, 2), 26.0));
+    // row 2
+    assert(approx_eq(res(2, 0), 37.0));
+    assert(approx_eq(res(2, 1), 38.0));
+    assert(approx_eq(res(2, 2), 39.0));
+
+    std::cout << "PASS test_broadcast_add_axis1\n";
+}
+
+void test_broadcast_add_does_not_modify_original() {
+    // broadcast_add is const — original should be unchanged
+    Matrix A(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix bias(1, 3, {10.0, 10.0, 10.0});
+
+    Matrix res = A.broadcast_add(bias, 0);
+
+    // A should be exactly as before
+    assert(approx_eq(A(0, 0), 1.0));
+    assert(approx_eq(A(0, 1), 2.0));
+    assert(approx_eq(A(1, 0), 4.0));
+    assert(approx_eq(A(1, 2), 6.0));
+
+    std::cout << "PASS test_broadcast_add_does_not_modify_original\n";
+}
+
+void test_broadcast_add_non_square() {
+    // works on non-square matrices too
+    // A (2x3) + row bias (1x3)
+    Matrix A(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix bias(1, 3, {1.0, 2.0, 3.0});
+
+    Matrix res = A.broadcast_add(bias, 0);
+
+    assert(res.rows() == 2);
+    assert(res.cols() == 3);
+    assert(approx_eq(res(0, 0), 2.0));
+    assert(approx_eq(res(0, 1), 4.0));
+    assert(approx_eq(res(0, 2), 6.0));
+    assert(approx_eq(res(1, 0), 5.0));
+    assert(approx_eq(res(1, 1), 7.0));
+    assert(approx_eq(res(1, 2), 9.0));
+
+    std::cout << "PASS test_broadcast_add_non_square\n";
+}
+
+void test_broadcast_add_axis0_wrong_cols_throws() {
+    // bias has wrong number of cols — should throw
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+    Matrix bias(1, 2, {10.0, 20.0});  // 2 cols, A has 3
+
+    bool threw = false;
+    try {
+        Matrix res = A.broadcast_add(bias, 0);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_broadcast_add_axis0_wrong_cols_throws\n";
+}
+
+void test_broadcast_add_axis1_wrong_rows_throws() {
+    // bias has wrong number of rows — should throw
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+    Matrix bias(2, 1, {10.0, 20.0});  // 2 rows, A has 3
+
+    bool threw = false;
+    try {
+        Matrix res = A.broadcast_add(bias, 1);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_broadcast_add_axis1_wrong_rows_throws\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -1189,6 +1331,12 @@ int main() {
     test_trace_square();
     test_trace_identity();
     test_trace_non_square_throws();
+    test_broadcast_add_axis0();
+    test_broadcast_add_axis1();
+    test_broadcast_add_does_not_modify_original();
+    test_broadcast_add_non_square();
+    test_broadcast_add_axis0_wrong_cols_throws();
+    test_broadcast_add_axis1_wrong_rows_throws();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }

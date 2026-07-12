@@ -849,6 +849,34 @@ double Matrix::trace() const {
     return trace;
 }
 
+Matrix Matrix::broadcast_add(const Matrix& vec, int axis) const {
+    // Row-wise
+    if (axis == 0) {
+        if (vec.rows() != 1 or vec.cols() != cols_)
+            throw std::runtime_error("Invalid row vector dimension\n");
+
+        Matrix res = *this;
+        for (size_t r = 0; r < rows_; r++) {
+            for (size_t c = 0; c < cols_; c++) {
+                res(r, c) += vec(0, c);
+            }
+        }
+        return res;
+    }
+    // Column-wise
+    if (axis == 1) {
+        if (vec.cols() != 1 or vec.rows() != rows())
+            throw std::runtime_error("Invalid column vector dimension\n");
+
+        Matrix res = *this;
+        for (size_t r = 0; r < rows_; r++) {
+            for (size_t c = 0; c < cols_; c++) {
+                res(r, c) += vec(r, 0);
+            }
+        }
+        return res;
+    }
+}
 //==============================
 // Output
 //==============================

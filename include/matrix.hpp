@@ -77,7 +77,8 @@ class Matrix {
         [[nodiscard]] double dot(const Matrix& other) const;
         [[nodiscard]] static Matrix outer_product(const Matrix& col, const Matrix& row);
         [[nodiscard]] double trace() const;
-
+        [[nodiscard]] Matrix broadcast_add(const Matrix& vec, int axis) const;
+        
         //==============================
         // Comparison
         //==============================
