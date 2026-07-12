@@ -969,17 +969,52 @@ void Matrix::swap_cols(size_t c1, size_t c2) {
     }
 }
 
-void Matrix::set_row(size_t r, const Matrix& vec) {}
-void Matrix::set_col(size_t c, const Matrix& vec) {}
-Matrix Matrix::diag() const {}                    // extract diagonal → (n x 1)
-Matrix Matrix::diag(const Matrix& vec) {}  // vec → diagonal matrix
-bool Matrix::approx_equal(const Matrix& other, double tol = 1e-9) const {}
-Matrix Matrix::relu() const {}
-Matrix Matrix::relu_derivative() const {}
-Matrix Matrix::sigmoid() const {}
-Matrix Matrix::sigmoid_derivative() const {}
-Matrix Matrix::normalize(int axis) const {}
-Matrix Matrix::pad(size_t top, size_t bottom, size_t left, size_t right) const {}
+void Matrix::set_row(size_t r, const Matrix& vec) {
+    if (r >= rows_)
+        throw std::runtime_error("Invalid row index\n");
+    if (vec.rows_ != 1 || vec.cols_ != cols_)
+        throw std::runtime_error("Vector dimension mismatch\n");
+    for (size_t c = 0; c < cols_; c++) {
+        data_[r * cols_ + c] = vec.data_[c];
+    }
+}
+void Matrix::set_col(size_t c, const Matrix& vec) {
+    if (c >= cols_)
+        throw std::runtime_error("Invalid column index\n");
+    if (vec.cols_ != 1 || vec.rows_ != rows_)
+        throw std::runtime_error("Vector dimension mismatch\n");
+    for (size_t r = 0; r < cols_; r++) {
+        data_[r * cols_ + c] = vec.data_[r];
+    }
+}
+
+// Construct a vector from a diagonal (n x 1)
+Matrix Matrix::diag() const {
+    if (rows_ != cols_)
+        throw std::runtime_error("Unable to extract a diagonal vector from a non-square matrix\n");
+    Matrix res(rows_, 1);
+    for (size_t i = 0; i < rows_; i++) {
+        res.data_[i] = data_[i * cols_ + i];
+    }
+    return res;
+}                   
+
+// Construct a diagonal matrix from a vector
+Matrix Matrix::diag(const Matrix& vec) {
+    Matrix res(vec.rows(), vec.rows());
+    for (size_t i = 0; i < vec.rows(); i++) {
+        res(i, i) = vec.data_[i];
+    }
+    return res;
+}  
+
+// bool Matrix::approx_equal(const Matrix& other, double tol = 1e-9) const {}
+// Matrix Matrix::relu() const {}
+// Matrix Matrix::relu_derivative() const {}
+// Matrix Matrix::sigmoid() const {}
+// Matrix Matrix::sigmoid_derivative() const {}
+// Matrix Matrix::normalize(int axis) const {}
+// Matrix Matrix::pad(size_t top, size_t bottom, size_t left, size_t right) const {}
 //==============================
 // Output
 //==============================

@@ -1369,6 +1369,267 @@ void test_softmax_axis1() {
 
     std::cout << "PASS test_softmax_axis1\n";
 }
+//==============================
+// relu tests
+//==============================
+
+// void test_relu() {
+//     // negative values → 0, positive values → unchanged
+//     Matrix a(2, 3, {-3.0, -1.0,  0.0,
+//                      1.0,  2.0,  5.0});
+//     Matrix res = a.relu();
+
+//     assert(approx_eq(res(0, 0), 0.0));
+//     assert(approx_eq(res(0, 1), 0.0));
+//     assert(approx_eq(res(0, 2), 0.0));
+//     assert(approx_eq(res(1, 0), 1.0));
+//     assert(approx_eq(res(1, 1), 2.0));
+//     assert(approx_eq(res(1, 2), 5.0));
+//     std::cout << "PASS test_relu\n";
+// }
+
+// void test_relu_does_not_modify_original() {
+//     Matrix a(2, 2, {-1.0, 2.0,
+//                     -3.0, 4.0});
+//     Matrix res = a.relu();
+//     assert(approx_eq(a(0, 0), -1.0));
+//     assert(approx_eq(a(1, 0), -3.0));
+//     std::cout << "PASS test_relu_does_not_modify_original\n";
+// }
+
+// void test_relu_derivative() {
+//     // derivative: 1 where x > 0, 0 elsewhere
+//     Matrix a(2, 3, {-3.0, -1.0,  0.0,
+//                      1.0,  2.0,  5.0});
+//     Matrix res = a.relu_derivative();
+
+//     assert(approx_eq(res(0, 0), 0.0));
+//     assert(approx_eq(res(0, 1), 0.0));
+//     assert(approx_eq(res(0, 2), 0.0));  // 0 → derivative is 0
+//     assert(approx_eq(res(1, 0), 1.0));
+//     assert(approx_eq(res(1, 1), 1.0));
+//     assert(approx_eq(res(1, 2), 1.0));
+//     std::cout << "PASS test_relu_derivative\n";
+// }
+
+// //==============================
+// // sigmoid tests
+// //==============================
+
+// void test_sigmoid_known_values() {
+//     // sigmoid(0) = 0.5 exactly
+//     // sigmoid(large positive) → 1
+//     // sigmoid(large negative) → 0
+//     Matrix a(1, 3, {0.0, 10.0, -10.0});
+//     Matrix res = a.sigmoid();
+
+//     assert(approx_eq(res(0, 0), 0.5));
+//     assert(approx_eq(res(0, 1), 1.0, 1e-4));   // very close to 1
+//     assert(approx_eq(res(0, 2), 0.0, 1e-4));   // very close to 0
+//     std::cout << "PASS test_sigmoid_known_values\n";
+// }
+
+// void test_sigmoid_output_range() {
+//     // all outputs must be strictly between 0 and 1
+//     Matrix a(2, 3, {-5.0, -1.0,  0.0,
+//                      1.0,  5.0, 10.0});
+//     Matrix res = a.sigmoid();
+
+//     for (size_t r = 0; r < 2; r++)
+//         for (size_t c = 0; c < 3; c++) {
+//             assert(res(r, c) > 0.0);
+//             assert(res(r, c) < 1.0);
+//         }
+//     std::cout << "PASS test_sigmoid_output_range\n";
+// }
+
+// void test_sigmoid_derivative() {
+//     // sigmoid_derivative(x) = sigmoid(x) * (1 - sigmoid(x))
+//     // at x=0: sigmoid(0) = 0.5, derivative = 0.5 * 0.5 = 0.25
+//     Matrix a(1, 1, {0.0});
+//     Matrix res = a.sigmoid_derivative();
+//     assert(approx_eq(res(0, 0), 0.25));
+//     std::cout << "PASS test_sigmoid_derivative\n";
+// }
+
+// void test_sigmoid_does_not_modify_original() {
+//     Matrix a(2, 2, {1.0, 2.0,
+//                     3.0, 4.0});
+//     Matrix res = a.sigmoid();
+//     assert(approx_eq(a(0, 0), 1.0));
+//     assert(approx_eq(a(1, 1), 4.0));
+//     std::cout << "PASS test_sigmoid_does_not_modify_original\n";
+// }
+
+//==============================
+// set_row / set_col tests
+//==============================
+
+void test_set_row() {
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+    Matrix new_row(1, 3, {10.0, 20.0, 30.0});
+
+    A.set_row(1, new_row);
+
+    assert(approx_eq(A(1, 0), 10.0));
+    assert(approx_eq(A(1, 1), 20.0));
+    assert(approx_eq(A(1, 2), 30.0));
+
+    // other rows unchanged
+    assert(approx_eq(A(0, 0), 1.0));
+    assert(approx_eq(A(2, 2), 9.0));
+    std::cout << "PASS test_set_row\n";
+}
+
+void test_set_row_out_of_range_throws() {
+    Matrix A(2, 2, {1.0, 2.0, 3.0, 4.0});
+    Matrix new_row(1, 2, {5.0, 6.0});
+    bool threw = false;
+    try {
+        A.set_row(5, new_row);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_set_row_out_of_range_throws\n";
+}
+
+void test_set_row_wrong_size_throws() {
+    Matrix A(2, 3, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
+    Matrix new_row(1, 2, {5.0, 6.0});  // wrong cols
+    bool threw = false;
+    try {
+        A.set_row(0, new_row);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_set_row_wrong_size_throws\n";
+}
+
+void test_set_col() {
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+    Matrix new_col(3, 1, {10.0, 20.0, 30.0});
+
+    A.set_col(1, new_col);
+
+    assert(approx_eq(A(0, 1), 10.0));
+    assert(approx_eq(A(1, 1), 20.0));
+    assert(approx_eq(A(2, 1), 30.0));
+
+    // other cols unchanged
+    assert(approx_eq(A(0, 0), 1.0));
+    assert(approx_eq(A(0, 2), 3.0));
+    std::cout << "PASS test_set_col\n";
+}
+
+void test_set_col_out_of_range_throws() {
+    Matrix A(2, 2, {1.0, 2.0, 3.0, 4.0});
+    Matrix new_col(2, 1, {5.0, 6.0});
+    bool threw = false;
+    try {
+        A.set_col(5, new_col);
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_set_col_out_of_range_throws\n";
+}
+
+//==============================
+// diag tests
+//==============================
+
+void test_diag_extract() {
+    // extract diagonal from square matrix
+    Matrix A(3, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0,
+                    7.0, 8.0, 9.0});
+    Matrix d = A.diag();
+
+    assert(d.rows() == 3);
+    assert(d.cols() == 1);
+    assert(approx_eq(d(0, 0), 1.0));
+    assert(approx_eq(d(1, 0), 5.0));
+    assert(approx_eq(d(2, 0), 9.0));
+    std::cout << "PASS test_diag_extract\n";
+}
+
+void test_diag_construct() {
+    // construct diagonal matrix from column vector
+    Matrix v(3, 1, {2.0, 5.0, 8.0});
+    Matrix D = Matrix::diag(v);
+
+    assert(D.rows() == 3);
+    assert(D.cols() == 3);
+
+    // diagonal should match v
+    assert(approx_eq(D(0, 0), 2.0));
+    assert(approx_eq(D(1, 1), 5.0));
+    assert(approx_eq(D(2, 2), 8.0));
+
+    // off-diagonal should be zero
+    assert(approx_eq(D(0, 1), 0.0));
+    assert(approx_eq(D(1, 0), 0.0));
+    assert(approx_eq(D(0, 2), 0.0));
+    std::cout << "PASS test_diag_construct\n";
+}
+
+void test_diag_non_square_throws() {
+    Matrix A(2, 3, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
+    bool threw = false;
+    try {
+        Matrix d = A.diag();
+    } catch (const std::runtime_error&) {
+        threw = true;
+    }
+    assert(threw);
+    std::cout << "PASS test_diag_non_square_throws\n";
+}
+
+//==============================
+// approx_equal tests
+//==============================
+
+// void test_approx_equal_identical() {
+//     Matrix a(2, 2, {1.0, 2.0, 3.0, 4.0});
+//     Matrix b(2, 2, {1.0, 2.0, 3.0, 4.0});
+//     assert(a.approx_equal(b));
+//     std::cout << "PASS test_approx_equal_identical\n";
+// }
+
+// void test_approx_equal_within_tolerance() {
+//     Matrix a(1, 3, {1.0,     2.0,     3.0    });
+//     Matrix b(1, 3, {1.0+1e-10, 2.0-1e-10, 3.0+1e-10});
+//     assert(a.approx_equal(b));
+//     std::cout << "PASS test_approx_equal_within_tolerance\n";
+// }
+
+// void test_approx_equal_outside_tolerance() {
+//     Matrix a(1, 2, {1.0, 2.0});
+//     Matrix b(1, 2, {1.1, 2.0});
+//     assert(!a.approx_equal(b));
+//     std::cout << "PASS test_approx_equal_outside_tolerance\n";
+// }
+
+// void test_approx_equal_custom_tolerance() {
+//     Matrix a(1, 2, {1.0, 2.0});
+//     Matrix b(1, 2, {1.05, 2.05});
+//     assert(!a.approx_equal(b, 1e-9));  // fails with tight tolerance
+//     assert( a.approx_equal(b, 0.1));   // passes with loose tolerance
+//     std::cout << "PASS test_approx_equal_custom_tolerance\n";
+// }
+
+// void test_approx_equal_different_shapes() {
+//     Matrix a(2, 2, {1.0, 2.0, 3.0, 4.0});
+//     Matrix b(1, 4, {1.0, 2.0, 3.0, 4.0});
+//     assert(!a.approx_equal(b));
+//     std::cout << "PASS test_approx_equal_different_shapes\n";
+// }
 
 int main() {
     test_construction();
@@ -1463,6 +1724,14 @@ int main() {
     test_softmax_does_not_modify_original();
     test_softmax_axis0();
     test_softmax_axis1();
+    test_set_row();
+    test_set_row_out_of_range_throws();
+    test_set_row_wrong_size_throws();
+    test_set_col();
+    test_set_col_out_of_range_throws();
+    test_diag_extract();
+    test_diag_construct();
+    test_diag_non_square_throws();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }
