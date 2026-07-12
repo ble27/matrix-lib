@@ -57,28 +57,28 @@ class Matrix {
         //==============================
         [[nodiscard]] Matrix  operator*(const Matrix& other) const;
         [[nodiscard]] Matrix  operator*(double factor) const;
-                    Matrix& operator*=(const Matrix& other);
-                    Matrix& operator*=(double factor);
+                      Matrix& operator*=(const Matrix& other);
+                      Matrix& operator*=(double factor);
         [[nodiscard]] Matrix  elementwise_multiply(const Matrix& other) const;
 
         [[nodiscard]] Matrix  operator+(const Matrix& other) const;
-                    Matrix& operator+=(const Matrix& other);
+                      Matrix& operator+=(const Matrix& other);
         [[nodiscard]] Matrix  operator+(double scalar) const;
-                    Matrix& operator+=(double scalar);
+                      Matrix& operator+=(double scalar);
 
         [[nodiscard]] Matrix  operator-(const Matrix& other) const;
-                    Matrix& operator-=(const Matrix& other);
+                      Matrix& operator-=(const Matrix& other);
         [[nodiscard]] Matrix  operator-(double scalar) const;
-                    Matrix& operator-=(double scalar);
+                      Matrix& operator-=(double scalar);
 
         [[nodiscard]] Matrix  operator/(double scalar) const;
-                    Matrix& operator/=(double scalar);
+                      Matrix& operator/=(double scalar);
 
         [[nodiscard]] double dot(const Matrix& other) const;
         [[nodiscard]] static Matrix outer_product(const Matrix& col, const Matrix& row);
         [[nodiscard]] double trace() const;
         [[nodiscard]] Matrix broadcast_add(const Matrix& vec, int axis) const;
-        
+
         //==============================
         // Comparison
         //==============================
@@ -141,9 +141,9 @@ class Matrix {
         //==============================
         // Utilities
         //==============================
-                    void fill(double value);
+                      void fill(double value);
         [[nodiscard]] Matrix clip(double min_val, double max_val) const;
-                    void save(const std::string& filename) const;
+                      void save(const std::string& filename) const;
 
         //==============================
         // Linear Algebra
@@ -152,6 +152,12 @@ class Matrix {
         [[nodiscard]] double determinant() const;
         [[nodiscard]] Matrix inverse() const;
         [[nodiscard]] Matrix solve(const Matrix& b) const;
+
+        //==============================
+        // Normalization
+        //==============================
+        [[nodiscard]] Matrix softmax() const;
+        [[nodiscard]] Matrix softmax(int axis) const;
 
         //==============================
         // Output

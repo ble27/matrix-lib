@@ -1252,6 +1252,124 @@ void test_broadcast_add_axis1_wrong_rows_throws() {
     std::cout << "PASS test_broadcast_add_axis1_wrong_rows_throws\n";
 }
 
+void test_softmax_sums_to_one() {
+    // output must always sum to 1.0 regardless of input
+    Matrix a(1, 4, {1.0, 2.0, 3.0, 4.0});
+    Matrix res = a.softmax();
+    assert(approx_eq(res.sum(), 1.0));
+    std::cout << "PASS test_softmax_sums_to_one\n";
+}
+
+void test_softmax_known_values() {
+    // [1, 2, 3] — computed by hand above
+    Matrix a(1, 3, {1.0, 2.0, 3.0});
+    Matrix res = a.softmax();
+
+    assert(res.rows() == 1);
+    assert(res.cols() == 3);
+    assert(approx_eq(res(0, 0), 0.090, 1e-3));
+    assert(approx_eq(res(0, 1), 0.245, 1e-3));
+    assert(approx_eq(res(0, 2), 0.665, 1e-3));
+    std::cout << "PASS test_softmax_known_values\n";
+}
+
+void test_softmax_all_same_input() {
+    // equal inputs → equal outputs → each = 1/n
+    // [2, 2, 2, 2] → [0.25, 0.25, 0.25, 0.25]
+    Matrix a(1, 4, {2.0, 2.0, 2.0, 2.0});
+    Matrix res = a.softmax();
+
+    for (size_t c = 0; c < 4; c++)
+        assert(approx_eq(res(0, c), 0.25));
+    assert(approx_eq(res.sum(), 1.0));
+    std::cout << "PASS test_softmax_all_same_input\n";
+}
+
+void test_softmax_all_values_positive() {
+    // softmax output is always in (0, 1)
+    Matrix a(1, 5, {-2.0, -1.0, 0.0, 1.0, 2.0});
+    Matrix res = a.softmax();
+
+    for (size_t c = 0; c < 5; c++) {
+        assert(res(0, c) > 0.0);
+        assert(res(0, c) < 1.0);
+    }
+    assert(approx_eq(res.sum(), 1.0));
+    std::cout << "PASS test_softmax_all_values_positive\n";
+}
+
+void test_softmax_large_values() {
+    // large inputs can cause overflow if not implemented with numeric stability
+    // e.g. e^1000 = inf — stable softmax subtracts max first
+    Matrix a(1, 3, {1000.0, 1001.0, 1002.0});
+    Matrix res = a.softmax();
+
+    // should not produce nan or inf
+    for (size_t c = 0; c < 3; c++) {
+        assert(!std::isnan(res(0, c)));
+        assert(!std::isinf(res(0, c)));
+        assert(res(0, c) > 0.0);
+    }
+    assert(approx_eq(res.sum(), 1.0));
+    std::cout << "PASS test_softmax_large_values\n";
+}
+
+void test_softmax_does_not_modify_original() {
+    Matrix a(1, 3, {1.0, 2.0, 3.0});
+    Matrix res = a.softmax();
+
+    assert(approx_eq(a(0, 0), 1.0));
+    assert(approx_eq(a(0, 1), 2.0));
+    assert(approx_eq(a(0, 2), 3.0));
+    std::cout << "PASS test_softmax_does_not_modify_original\n";
+}
+
+void test_softmax_axis0() {
+    // axis=0 — softmax across each row independently
+    // row 0: softmax([1, 2]) 
+    // row 1: softmax([3, 4])
+    // each row should sum to 1.0
+    Matrix a(2, 2, {1.0, 2.0,
+                    3.0, 4.0});
+    Matrix res = a.softmax(0);
+
+    assert(res.rows() == 2);
+    assert(res.cols() == 2);
+
+    // each row sums to 1
+    assert(approx_eq(res(0, 0) + res(0, 1), 1.0));
+    assert(approx_eq(res(1, 0) + res(1, 1), 1.0));
+
+    // larger input → larger softmax output within same row
+    assert(res(0, 1) > res(0, 0));  // 2 > 1
+    assert(res(1, 1) > res(1, 0));  // 4 > 3
+
+    std::cout << "PASS test_softmax_axis0\n";
+}
+
+void test_softmax_axis1() {
+    // axis=1 — softmax down each column independently
+    // col 0: softmax([1, 3])
+    // col 1: softmax([2, 4])
+    // each column should sum to 1.0
+    Matrix a(2, 2, {1.0, 2.0,
+                    3.0, 4.0});
+    Matrix res = a.softmax(1);
+
+    assert(res.rows() == 2);
+    assert(res.cols() == 2);
+
+    // each col sums to 1
+    assert(approx_eq(res(0, 0) + res(1, 0), 1.0));
+    assert(approx_eq(res(0, 1) + res(1, 1), 1.0));
+
+    // larger input → larger softmax output within same col
+    assert(res(1, 0) > res(0, 0));  // 3 > 1
+    assert(res(1, 1) > res(0, 1));  // 4 > 2
+
+    std::cout << "PASS test_softmax_axis1\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -1337,6 +1455,14 @@ int main() {
     test_broadcast_add_non_square();
     test_broadcast_add_axis0_wrong_cols_throws();
     test_broadcast_add_axis1_wrong_rows_throws();
+    test_softmax_sums_to_one();
+    test_softmax_known_values();
+    test_softmax_all_same_input();
+    test_softmax_all_values_positive();
+    test_softmax_large_values();
+    test_softmax_does_not_modify_original();
+    test_softmax_axis0();
+    test_softmax_axis1();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }

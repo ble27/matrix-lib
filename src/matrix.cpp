@@ -877,6 +877,74 @@ Matrix Matrix::broadcast_add(const Matrix& vec, int axis) const {
         return res;
     }
 }
+
+//==============================
+// Normalization
+//==============================
+
+Matrix Matrix::softmax() const {
+    // entry = exp(entry) / sum of all exp(entry)
+    double max_val = *std::max_element(data_.begin(), data_.end());
+
+    double tot_exp = 0.0;
+    for (size_t i = 0; i < data_.size(); i++) {
+        tot_exp += std::exp(data_[i] - max_val);
+    }
+
+    Matrix res(rows_, cols_);
+    for (size_t i = 0; i < res.data_.size(); i++) {
+        res.data_[i] = std::exp(data_[i] - max_val) / tot_exp;
+    }
+    return res;
+}
+
+Matrix Matrix::softmax(int axis) const {
+    // Across rows
+    if (axis == 0) {
+        std::vector<double> tot_exp_row(rows_, 0.0);
+        std::vector<double> max_vals(rows_, 0.0);
+
+        for (size_t r = 0; r < rows_; r++) {
+            // find max entry across row
+            for (size_t c = 0; c < cols_; c++) 
+                max_vals[r]= std::max((*this)(r, c), max_vals[r]);
+
+            // tot of all exponentiated(entry - max)
+            for (size_t c = 0; c < cols_; c++) {
+                tot_exp_row[r] += std::exp((*this)(r, c) - max_vals[r]);
+            }
+        }
+        Matrix res(rows_, cols_);
+        for (size_t r = 0; r < rows_; r++) {
+            for (size_t c = 0; c < cols_; c++) {
+                res(r, c) = std::exp((*this)(r, c) - max_vals[r]) / tot_exp_row[r];
+            }
+        }
+        return res;
+    }    
+    // Across cols
+    std::vector<double> tot_exp_col(cols_, 0.0);
+    std::vector<double> max_vals(cols_, 0.0);
+
+    for (size_t c = 0; c < cols_; c++) {
+        // find max entry across col
+        for (size_t r = 0; r < rows_; r++) {
+            max_vals[c] = std::max((*this)(r, c), max_vals[c]);
+        }
+        for (size_t r = 0; r < rows_; r++) {
+            tot_exp_col[c] += std::exp((*this)(r, c) - max_vals[c]);
+        }
+    }
+
+    Matrix res(rows_, cols_);
+    for (size_t r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            res(r, c) = std::exp((*this)(r, c) - max_vals[c]) / tot_exp_col[c];
+        }
+    }
+    return res;
+}
+
 //==============================
 // Output
 //==============================
