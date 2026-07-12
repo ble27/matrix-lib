@@ -1056,7 +1056,46 @@ Matrix Matrix::sigmoid_derivative() const {
     return res;
 
 }
-// Matrix Matrix::normalize(int axis) const {}
+
+Matrix Matrix::normalize(int axis) const {
+    // divide each entry by the L2 normalization of the row or column based on axis
+    // Column-by-column (vertically)
+    Matrix res = *this;
+    if (axis == 0) {
+        std::vector<double> l2_vals (cols_, 0.0);
+        for (size_t c = 0; c < cols_; c++) {
+            for (size_t r = 0; r < rows_; r++) {
+                l2_vals[c] += (*this)(r, c) * (*this)(r, c);
+            }
+            l2_vals[c] = std::sqrt(l2_vals[c]);
+        }
+        for (size_t c = 0; c < cols_; c++) {
+            if (l2_vals[c] > 1e-9){
+                for (size_t r = 0; r < rows_; r++) {
+                    res(r, c) /= l2_vals[c];
+                }
+            }
+        }
+        return res;
+    }
+    // Row-by-row (horizontally)
+    std::vector<double> l2_vals (rows_, 0.0);
+    for (size_t r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            l2_vals[r] += (*this)(r, c) * (*this)(r, c);
+        }
+        l2_vals[r] = std::sqrt(l2_vals[r]);
+    }
+    for (size_t r = 0; r < rows_; r++) {
+        if (l2_vals[r] > 1e-9){
+            for (size_t c = 0; c < cols_; c++) {
+                res(r, c) /= l2_vals[r];
+            }
+        }
+    }
+    return res;
+}
+
 // Matrix Matrix::pad(size_t top, size_t bottom, size_t left, size_t right) const {}
 //==============================
 // Output
