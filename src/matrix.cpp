@@ -220,16 +220,26 @@ double Matrix::sum() const {
 }
 
 Matrix Matrix::sum(int axis) const {
-    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+    if (data_.empty())
+        throw std::runtime_error("reduction is undefined for an empty matrix");
+
+    if (axis != 0 && axis != 1)
+        throw std::runtime_error("axis must be 0 or 1");
+    
+    Matrix res = (axis == 0) ? Matrix(1, cols_) : Matrix(rows_, 1);
+
+    // Column-by-column (vertically)
     if (axis == 0) {
+         for (size_t c = 0; c < cols_; c++)
+            for (size_t r = 0; r < rows_; r++)
+                res(0, c) += (*this)(r, c);
+    }
+    // Row-by-row (horizontally)
+    else { 
         for (size_t r = 0; r < rows_; r++)
             for (size_t c = 0; c < cols_; c++)
                 res(r, 0) += (*this)(r, c);
-        return res;
     }
-    for (size_t c = 0; c < cols_; c++)
-        for (size_t r = 0; r < rows_; r++)
-            res(0, c) += (*this)(r, c);
     return res;
 }
 
@@ -238,20 +248,17 @@ double Matrix::mean() const {
 }
 
 Matrix Matrix::mean(int axis) const {
-    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
-    if (axis == 0) {
-        for (size_t r = 0; r < rows_; r++) {
-            double s = 0.0;
-            for (size_t c = 0; c < cols_; c++)
-                s += (*this)(r, c);
-            res(r, 0) = s / cols_;
-        }
-        return res;
-    }
-    for (size_t c = 0; c < cols_; c++) {
-        for (size_t r = 0; r < rows_; r++)
-            res(0, c) += (*this)(r, c);
-        res(0, c) /= rows_;
+    if (data_.empty())
+        throw std::runtime_error("reduction is undefined for an empty matrix");
+
+    if (axis != 0 && axis != 1)
+        throw std::runtime_error("axis must be 0 or 1");
+
+    Matrix res = sum(axis);
+    const double divisor = static_cast<double>(axis == 0 ? rows_ : cols_);
+
+    for (size_t i = 0; i < res.data_.size(); i++) {
+        res.data_[i] /= divisor;
     }
     return res;
 }
@@ -265,24 +272,30 @@ double Matrix::max() const {
 }
 
 Matrix Matrix::max(int axis) const {
-    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+    if (data_.empty())
+        throw std::runtime_error("reduction is undefined for an empty matrix");
+
+    if (axis != 0 && axis != 1)
+        throw std::runtime_error("axis must be 0 or 1");
+
+    Matrix res = (axis == 0) ? Matrix(1, cols_) : Matrix(rows_, 1);
+
     if (axis == 0) {
+        for (size_t c = 0; c < cols_; c++) {
+            double cur_max = (*this)(0, c);
+            for (size_t r = 1; r < rows_; r++)
+                cur_max = std::max(cur_max, (*this)(r, c));
+            res(0, c) = cur_max;    
+        }
+    }
+    else {
         for (size_t r = 0; r < rows_; r++) {
             double cur_max = (*this)(r, 0);
             for (size_t c = 1; c < cols_; c++)
-                if ((*this)(r, c) > cur_max)
-                    cur_max = (*this)(r, c);
+                cur_max = std::max(cur_max, (*this)(r, c));
             res(r, 0) = cur_max;
         }
-        return res;
-    }
-    for (size_t c = 0; c < cols_; c++) {
-        double cur_max = (*this)(0, c);
-        for (size_t r = 1; r < rows_; r++)
-            if ((*this)(r, c) > cur_max)
-                cur_max = (*this)(r, c);
-        res(0, c) = cur_max;
-    }
+    }    
     return res;
 }
 
@@ -295,23 +308,29 @@ double Matrix::min() const {
 }
 
 Matrix Matrix::min(int axis) const {
-    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+    if (data_.empty())
+        throw std::runtime_error("reduction is undefined for an empty matrix");
+        
+    if (axis != 0 && axis != 1)
+        throw std::runtime_error("axis must be 0 or 1");
+    
+    Matrix res = (axis == 0) ? Matrix(1, cols_) : Matrix(rows_, 1);
+
     if (axis == 0) {
+        for (size_t c = 0; c < cols_; c++) {
+            double cur_min = (*this)(0, c);
+            for (size_t r = 1; r < rows_; r++)
+                cur_min = std::min(cur_min, (*this)(r, c));
+            res(0, c) = cur_min;
+        }
+    }
+    else {
         for (size_t r = 0; r < rows_; r++) {
             double cur_min = (*this)(r, 0);
             for (size_t c = 1; c < cols_; c++)
-                if ((*this)(r, c) < cur_min)
-                    cur_min = (*this)(r, c);
-            res(r, 0) = cur_min;
+                cur_min = std::min(cur_min, (*this)(r, c));
+        res(r, 0) = cur_min;
         }
-        return res;
-    }
-    for (size_t c = 0; c < cols_; c++) {
-        double cur_min = (*this)(0, c);
-        for (size_t r = 1; r < rows_; r++)
-            if ((*this)(r, c) < cur_min)
-                cur_min = (*this)(r, c);
-        res(0, c) = cur_min;
     }
     return res;
 }
