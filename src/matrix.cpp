@@ -310,7 +310,7 @@ double Matrix::min() const {
 Matrix Matrix::min(int axis) const {
     if (data_.empty())
         throw std::runtime_error("reduction is undefined for an empty matrix");
-        
+
     if (axis != 0 && axis != 1)
         throw std::runtime_error("axis must be 0 or 1");
     
@@ -550,12 +550,31 @@ size_t Matrix::argmin() const {
 }
 
 Matrix Matrix::argmax(int axis) const {
-    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+    if (axis != 0 && axis != 1)
+        throw std::runtime_error("axis must be 0 or 1");
 
-    // Across rows
+    if (rows_ == 0 || cols_ == 0)
+        throw std::runtime_error("argmax is undefined for an empty matrix");
+
+    Matrix res = (axis == 0) ? Matrix(1, cols_) : Matrix(rows_, 1);
+
+    // Column-by-column (vertically)
     if (axis == 0) {
-        for (size_t r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; ++c) {
+            size_t cur_max_row = 0;
+
+            for (size_t r = 1; r < rows_; ++r) {
+                if ((*this)(r, c) > (*this)(cur_max_row, c))
+                cur_max_row = r;
+            }
+        res(0, c) = static_cast<double>(cur_max_row);
+    }
+    }
+    // Row-by-row (horizontally)
+    else {
+         for (size_t r = 0; r < rows_; r++) {
             size_t cur_max_col = 0;
+
             for (size_t c = 1; c < cols_; c++) {
                 if ((*this)(r, c) > (*this)(r, cur_max_col)) {
                     cur_max_col = c;
@@ -563,41 +582,21 @@ Matrix Matrix::argmax(int axis) const {
             }
             res(r, 0) = static_cast<double>(cur_max_col); 
         }
-        return res;
     }
-    // Across cols
-    else {
-        for (size_t c = 0; c < cols_; c++) {
-            size_t cur_max_row = 0;
-            for (size_t r = 1; r < rows_; r++) {
-                if ((*this)(r, c) > (*this)(cur_max_row, c)) {
-                    cur_max_row = r;
-                }
-            }
-            res(0, c) = static_cast<double>(cur_max_row); 
-        }
-        return res;
-    }
+    return res;
 } 
 
 Matrix Matrix::argmin(int axis) const {
-    Matrix res = (axis == 0) ? Matrix(rows_, 1) : Matrix(1, cols_);
+    if (axis != 0 && axis != 1)
+        throw std::runtime_error("axis must be 0 or 1");
 
-    // Across rows
+    if (rows_ == 0 || cols_ == 0)
+        throw std::runtime_error("argmin is undefined for an empty matrix");
+
+    Matrix res = (axis == 0) ? Matrix(1, cols_) : Matrix(rows_, 1);
+
+    // Column-by-column (vertically)
     if (axis == 0) {
-        for (size_t r = 0; r < rows_; r++) {
-            size_t cur_min_col = 0;
-            for (size_t c = 1; c < cols_; c++) {
-                if ((*this)(r, c) < (*this)(r, cur_min_col)) {
-                    cur_min_col = c;
-                }
-            }
-            res(r, 0) = static_cast<double>(cur_min_col); 
-        }
-        return res;
-    }
-    // Across cols
-    else {
         for (size_t c = 0; c < cols_; c++) {
             size_t cur_min_row = 0;
             for (size_t r = 1; r < rows_; r++) {
@@ -607,8 +606,20 @@ Matrix Matrix::argmin(int axis) const {
             }
             res(0, c) = static_cast<double>(cur_min_row); 
         }
-        return res;
     }
+    // Row-by-row (horizontally)
+    else {
+        for (size_t r = 0; r < rows_; r++) {
+            size_t cur_min_col = 0;
+            for (size_t c = 1; c < cols_; c++) {
+                if ((*this)(r, c) < (*this)(r, cur_min_col)) {
+                    cur_min_col = c;
+                }
+            }
+            res(r, 0) = static_cast<double>(cur_min_col); 
+        }
+    }
+    return res;
 }
 
 //==============================
