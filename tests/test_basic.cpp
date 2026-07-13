@@ -2,6 +2,10 @@
  * tests/test_basic.cpp
  * author: Bao Le
  */
+/**
+ * tests/test_basic.cpp
+ * author: Bao Le
+ */
 
 #include "../include/matrix.hpp"
 #include <iostream>
@@ -10,6 +14,14 @@
 
 bool approx_eq(double a, double b, double tol = 1e-9) {
     return std::abs(a - b) < tol;
+}
+
+void assert_matrix_eq(const Matrix& actual, const Matrix& expected, double tol = 1e-9) {
+    assert(actual.rows() == expected.rows());
+    assert(actual.cols() == expected.cols());
+    for (size_t r = 0; r < actual.rows(); ++r)
+        for (size_t c = 0; c < actual.cols(); ++c)
+            assert(approx_eq(actual(r, c), expected(r, c), tol));
 }
 
 void test_construction() {
@@ -191,28 +203,18 @@ void test_sum_all() {
 }
 
 void test_sum_axis0() {
-    // sum across columns for each row
-    // row 0: 1+2+3 = 6
-    // row 1: 4+5+6 = 15
+    // axis 0: reduce rows, producing one value per column.
     Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix res = a.sum(0);
-    assert(approx_eq(res(0, 0), 6.0));
-    assert(approx_eq(res(1, 0), 15.0));
+    assert_matrix_eq(a.sum(0), Matrix(1, 3, {5.0, 7.0, 9.0}));
     std::cout << "PASS test_sum_axis0\n";
 }
 
 void test_sum_axis1() {
-    // sum down each column across rows
-    // col 0: 1+4 = 5
-    // col 1: 2+5 = 7
-    // col 2: 3+6 = 9
+    // axis 1: reduce columns, producing one value per row.
     Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix res = a.sum(1);
-    assert(approx_eq(res(0, 0), 5.0));
-    assert(approx_eq(res(0, 1), 7.0));
-    assert(approx_eq(res(0, 2), 9.0));
+    assert_matrix_eq(a.sum(1), Matrix(2, 1, {6.0, 15.0}));
     std::cout << "PASS test_sum_axis1\n";
 }
 
@@ -225,28 +227,16 @@ void test_mean_all() {
 }
 
 void test_mean_axis0() {
-    // mean across columns for each row
-    // row 0: (1+2+3) / 3 = 2.0
-    // row 1: (4+5+6) / 3 = 5.0
     Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix res = a.mean(0);
-    assert(approx_eq(res(0, 0), 2.0));
-    assert(approx_eq(res(1, 0), 5.0));
+    assert_matrix_eq(a.mean(0), Matrix(1, 3, {2.5, 3.5, 4.5}));
     std::cout << "PASS test_mean_axis0\n";
 }
 
 void test_mean_axis1() {
-    // mean down each column across rows
-    // col 0: (1+4) / 2 = 2.5
-    // col 1: (2+5) / 2 = 3.5
-    // col 2: (3+6) / 2 = 4.5
     Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix res = a.mean(1);
-    assert(approx_eq(res(0, 0), 2.5));
-    assert(approx_eq(res(0, 1), 3.5));
-    assert(approx_eq(res(0, 2), 4.5));
+    assert_matrix_eq(a.mean(1), Matrix(2, 1, {2.0, 5.0}));
     std::cout << "PASS test_mean_axis1\n";
 }
 
@@ -258,28 +248,16 @@ void test_max_all() {
 }
 
 void test_max_axis0() {
-    // max across columns for each row
-    // row 0: max(1,2,3) = 3
-    // row 1: max(4,5,6) = 6
     Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix res = a.max(0);
-    assert(approx_eq(res(0, 0), 3.0));
-    assert(approx_eq(res(1, 0), 6.0));
+    assert_matrix_eq(a.max(0), Matrix(1, 3, {4.0, 5.0, 6.0}));
     std::cout << "PASS test_max_axis0\n";
 }
 
 void test_max_axis1() {
-    // max down each column across rows
-    // col 0: max(1,4) = 4
-    // col 1: max(2,5) = 5
-    // col 2: max(3,6) = 6
     Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix res = a.max(1);
-    assert(approx_eq(res(0, 0), 4.0));
-    assert(approx_eq(res(0, 1), 5.0));
-    assert(approx_eq(res(0, 2), 6.0));
+    assert_matrix_eq(a.max(1), Matrix(2, 1, {3.0, 6.0}));
     std::cout << "PASS test_max_axis1\n";
 }
 
@@ -291,28 +269,16 @@ void test_min_all() {
 }
 
 void test_min_axis0() {
-    // min across columns for each row
-    // row 0: min(1,2,3) = 1
-    // row 1: min(4,5,6) = 4
     Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix res = a.min(0);
-    assert(approx_eq(res(0, 0), 1.0));
-    assert(approx_eq(res(1, 0), 4.0));
+    assert_matrix_eq(a.min(0), Matrix(1, 3, {1.0, 2.0, 3.0}));
     std::cout << "PASS test_min_axis0\n";
 }
 
 void test_min_axis1() {
-    // min down each column across rows
-    // col 0: min(1,4) = 1
-    // col 1: min(2,5) = 2
-    // col 2: min(3,6) = 3
     Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix res = a.min(1);
-    assert(approx_eq(res(0, 0), 1.0));
-    assert(approx_eq(res(0, 1), 2.0));
-    assert(approx_eq(res(0, 2), 3.0));
+    assert_matrix_eq(a.min(1), Matrix(2, 1, {1.0, 4.0}));
     std::cout << "PASS test_min_axis1\n";
 }
 
@@ -596,77 +562,40 @@ void test_argmin_flat_last_element() {
 }
 
 void test_argmax_axis0() {
-    // axis=0 → per row, which col has the max
-    // row 0: max(3,1,4) → col 2
-    // row 1: max(1,5,2) → col 1
+    // axis 0: per column, return the row index of the maximum.
     Matrix a(2, 3, {3.0, 1.0, 4.0,
                     1.0, 5.0, 2.0});
-    Matrix res = a.argmax(0);
-
-    assert(res.rows() == 2);
-    assert(res.cols() == 1);
-    assert(approx_eq(res(0, 0), 2.0));  // col 2
-    assert(approx_eq(res(1, 0), 1.0));  // col 1
+    assert_matrix_eq(a.argmax(0), Matrix(1, 3, {0.0, 1.0, 0.0}));
     std::cout << "PASS test_argmax_axis0\n";
 }
 
 void test_argmax_axis0_first_col() {
-    // max is always in col 0 — tests initialization to best_col=0 is correct
-    Matrix a(2, 3, {9.0, 1.0, 2.0,
-                    8.0, 3.0, 4.0});
-    Matrix res = a.argmax(0);
-
-    assert(approx_eq(res(0, 0), 0.0));
-    assert(approx_eq(res(1, 0), 0.0));
+    // The maximum is in row 0 for every column.
+    Matrix a(2, 3, {9.0, 8.0, 7.0,
+                    1.0, 2.0, 3.0});
+    assert_matrix_eq(a.argmax(0), Matrix(1, 3, {0.0, 0.0, 0.0}));
     std::cout << "PASS test_argmax_axis0_first_col\n";
 }
 
 void test_argmax_axis1() {
-    // axis=1 → per col, which row has the max
-    // col 0: max(3,1) → row 0
-    // col 1: max(1,5) → row 1
-    // col 2: max(4,2) → row 0
+    // axis 1: per row, return the column index of the maximum.
     Matrix a(2, 3, {3.0, 1.0, 4.0,
                     1.0, 5.0, 2.0});
-    Matrix res = a.argmax(1);
-
-    assert(res.rows() == 1);
-    assert(res.cols() == 3);
-    assert(approx_eq(res(0, 0), 0.0));  // row 0
-    assert(approx_eq(res(0, 1), 1.0));  // row 1
-    assert(approx_eq(res(0, 2), 0.0));  // row 0
+    assert_matrix_eq(a.argmax(1), Matrix(2, 1, {2.0, 1.0}));
     std::cout << "PASS test_argmax_axis1\n";
 }
 
 void test_argmin_axis0() {
-    // axis=0 → per row, which col has the min
-    // row 0: min(3,1,4) → col 1
-    // row 1: min(1,5,2) → col 0
     Matrix a(2, 3, {3.0, 1.0, 4.0,
                     1.0, 5.0, 2.0});
-    Matrix res = a.argmin(0);
-
-    assert(res.rows() == 2);
-    assert(res.cols() == 1);
-    assert(approx_eq(res(0, 0), 1.0));  // col 1
-    assert(approx_eq(res(1, 0), 0.0));  // col 0
+    assert_matrix_eq(a.argmin(0), Matrix(1, 3, {1.0, 0.0, 1.0}));
     std::cout << "PASS test_argmin_axis0\n";
 }
 
 void test_argmin_axis1() {
-    // axis=1 → per col, which row has the min
-    // col 0: min(3,1) → row 1
-    // col 1: min(1,5) → row 0
-    // col 2: min(4,2) → row 1
     Matrix a(2, 3, {3.0, 1.0, 4.0,
                     1.0, 5.0, 2.0});
-    Matrix res = a.argmin(1);
-
-    assert(res.rows() == 1);
-    assert(res.cols() == 3);
-    assert(approx_eq(res(0, 0), 1.0));  // row 1
-    assert(approx_eq(res(0, 1), 0.0));  // row 0
-    assert(approx_eq(res(0, 2), 1.0));  // row 1
+    assert_matrix_eq(a.argmin(1), Matrix(2, 1, {1.0, 0.0}));
     std::cout << "PASS test_argmin_axis1\n";
 }
 
@@ -1111,143 +1040,67 @@ void test_trace_non_square_throws() {
 }
 
 void test_broadcast_add_axis0() {
-    // add row vector to every row
-    // A = [[1, 2, 3],     bias = [[10, 20, 30]]
-    //      [4, 5, 6],
-    //      [7, 8, 9]]
-    //
-    // result = [[11, 22, 33],
-    //           [14, 25, 36],
-    //           [17, 28, 39]]
-    Matrix A(3, 3, {1.0, 2.0, 3.0,
-                    4.0, 5.0, 6.0,
-                    7.0, 8.0, 9.0});
-    Matrix bias(1, 3, {10.0, 20.0, 30.0});
-
-    Matrix res = A.broadcast_add(bias, 0);
-
-    assert(res.rows() == 3);
-    assert(res.cols() == 3);
-
-    // row 0
-    assert(approx_eq(res(0, 0), 11.0));
-    assert(approx_eq(res(0, 1), 22.0));
-    assert(approx_eq(res(0, 2), 33.0));
-    // row 1
-    assert(approx_eq(res(1, 0), 14.0));
-    assert(approx_eq(res(1, 1), 25.0));
-    assert(approx_eq(res(1, 2), 36.0));
-    // row 2
-    assert(approx_eq(res(2, 0), 17.0));
-    assert(approx_eq(res(2, 1), 28.0));
-    assert(approx_eq(res(2, 2), 39.0));
-
+    // axis 0: a rows x 1 column vector is copied across columns.
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix bias(2, 1, {10.0, 20.0});
+    assert_matrix_eq(a.broadcast_add(bias, 0),
+                     Matrix(2, 3, {11.0, 12.0, 13.0,
+                                   24.0, 25.0, 26.0}));
     std::cout << "PASS test_broadcast_add_axis0\n";
 }
 
 void test_broadcast_add_axis1() {
-    // add column vector to every column
-    // A = [[1, 2, 3],     bias = [[10],
-    //      [4, 5, 6],              [20],
-    //      [7, 8, 9]]              [30]]
-    //
-    // result = [[11, 12, 13],
-    //           [24, 25, 26],
-    //           [37, 38, 39]]
-    Matrix A(3, 3, {1.0, 2.0, 3.0,
-                    4.0, 5.0, 6.0,
-                    7.0, 8.0, 9.0});
-    Matrix bias(3, 1, {10.0, 20.0, 30.0});
-
-    Matrix res = A.broadcast_add(bias, 1);
-
-    assert(res.rows() == 3);
-    assert(res.cols() == 3);
-
-    // row 0
-    assert(approx_eq(res(0, 0), 11.0));
-    assert(approx_eq(res(0, 1), 12.0));
-    assert(approx_eq(res(0, 2), 13.0));
-    // row 1
-    assert(approx_eq(res(1, 0), 24.0));
-    assert(approx_eq(res(1, 1), 25.0));
-    assert(approx_eq(res(1, 2), 26.0));
-    // row 2
-    assert(approx_eq(res(2, 0), 37.0));
-    assert(approx_eq(res(2, 1), 38.0));
-    assert(approx_eq(res(2, 2), 39.0));
-
+    // axis 1: a 1 x cols row vector is copied across rows.
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+    Matrix bias(1, 3, {10.0, 20.0, 30.0});
+    assert_matrix_eq(a.broadcast_add(bias, 1),
+                     Matrix(2, 3, {11.0, 22.0, 33.0,
+                                   14.0, 25.0, 36.0}));
     std::cout << "PASS test_broadcast_add_axis1\n";
 }
 
 void test_broadcast_add_does_not_modify_original() {
-    // broadcast_add is const — original should be unchanged
-    Matrix A(2, 3, {1.0, 2.0, 3.0,
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix bias(1, 3, {10.0, 10.0, 10.0});
-
-    Matrix res = A.broadcast_add(bias, 0);
-
-    // A should be exactly as before
-    assert(approx_eq(A(0, 0), 1.0));
-    assert(approx_eq(A(0, 1), 2.0));
-    assert(approx_eq(A(1, 0), 4.0));
-    assert(approx_eq(A(1, 2), 6.0));
-
+    Matrix original = a;
+    Matrix bias(2, 1, {10.0, 20.0});
+    (void)a.broadcast_add(bias, 0);
+    assert_matrix_eq(a, original);
     std::cout << "PASS test_broadcast_add_does_not_modify_original\n";
 }
 
 void test_broadcast_add_non_square() {
-    // works on non-square matrices too
-    // A (2x3) + row bias (1x3)
-    Matrix A(2, 3, {1.0, 2.0, 3.0,
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
                     4.0, 5.0, 6.0});
-    Matrix bias(1, 3, {1.0, 2.0, 3.0});
-
-    Matrix res = A.broadcast_add(bias, 0);
-
-    assert(res.rows() == 2);
-    assert(res.cols() == 3);
-    assert(approx_eq(res(0, 0), 2.0));
-    assert(approx_eq(res(0, 1), 4.0));
-    assert(approx_eq(res(0, 2), 6.0));
-    assert(approx_eq(res(1, 0), 5.0));
-    assert(approx_eq(res(1, 1), 7.0));
-    assert(approx_eq(res(1, 2), 9.0));
-
+    Matrix column_bias(2, 1, {10.0, 20.0});
+    Matrix row_bias(1, 3, {1.0, 2.0, 3.0});
+    assert_matrix_eq(a.broadcast_add(column_bias, 0),
+                     Matrix(2, 3, {11.0, 12.0, 13.0,
+                                   24.0, 25.0, 26.0}));
+    assert_matrix_eq(a.broadcast_add(row_bias, 1),
+                     Matrix(2, 3, {2.0, 4.0, 6.0,
+                                   5.0, 7.0, 9.0}));
     std::cout << "PASS test_broadcast_add_non_square\n";
 }
 
 void test_broadcast_add_axis0_wrong_cols_throws() {
-    // bias has wrong number of cols — should throw
-    Matrix A(3, 3, {1.0, 2.0, 3.0,
-                    4.0, 5.0, 6.0,
-                    7.0, 8.0, 9.0});
-    Matrix bias(1, 2, {10.0, 20.0});  // 2 cols, A has 3
-
+    Matrix a(2, 3);
+    Matrix wrong_shape(1, 3, {10.0, 20.0, 30.0});
     bool threw = false;
-    try {
-        Matrix res = A.broadcast_add(bias, 0);
-    } catch (const std::runtime_error&) {
-        threw = true;
-    }
+    try { (void)a.broadcast_add(wrong_shape, 0); }
+    catch (const std::runtime_error&) { threw = true; }
     assert(threw);
     std::cout << "PASS test_broadcast_add_axis0_wrong_cols_throws\n";
 }
 
 void test_broadcast_add_axis1_wrong_rows_throws() {
-    // bias has wrong number of rows — should throw
-    Matrix A(3, 3, {1.0, 2.0, 3.0,
-                    4.0, 5.0, 6.0,
-                    7.0, 8.0, 9.0});
-    Matrix bias(2, 1, {10.0, 20.0});  // 2 rows, A has 3
-
+    Matrix a(2, 3);
+    Matrix wrong_shape(2, 1, {10.0, 20.0});
     bool threw = false;
-    try {
-        Matrix res = A.broadcast_add(bias, 1);
-    } catch (const std::runtime_error&) {
-        threw = true;
-    }
+    try { (void)a.broadcast_add(wrong_shape, 1); }
+    catch (const std::runtime_error&) { threw = true; }
     assert(threw);
     std::cout << "PASS test_broadcast_add_axis1_wrong_rows_throws\n";
 }
@@ -1325,48 +1178,27 @@ void test_softmax_does_not_modify_original() {
 }
 
 void test_softmax_axis0() {
-    // axis=0 — softmax across each row independently
-    // row 0: softmax([1, 2]) 
-    // row 1: softmax([3, 4])
-    // each row should sum to 1.0
-    Matrix a(2, 2, {1.0, 2.0,
-                    3.0, 4.0});
+    // axis 0: independently normalize each column.
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
     Matrix res = a.softmax(0);
-
-    assert(res.rows() == 2);
-    assert(res.cols() == 2);
-
-    // each row sums to 1
-    assert(approx_eq(res(0, 0) + res(0, 1), 1.0));
-    assert(approx_eq(res(1, 0) + res(1, 1), 1.0));
-
-    // larger input → larger softmax output within same row
-    assert(res(0, 1) > res(0, 0));  // 2 > 1
-    assert(res(1, 1) > res(1, 0));  // 4 > 3
-
+    for (size_t c = 0; c < res.cols(); ++c) {
+        assert(approx_eq(res(0, c) + res(1, c), 1.0));
+        assert(res(1, c) > res(0, c));
+    }
     std::cout << "PASS test_softmax_axis0\n";
 }
 
 void test_softmax_axis1() {
-    // axis=1 — softmax down each column independently
-    // col 0: softmax([1, 3])
-    // col 1: softmax([2, 4])
-    // each column should sum to 1.0
-    Matrix a(2, 2, {1.0, 2.0,
-                    3.0, 4.0});
+    // axis 1: independently normalize each row.
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
     Matrix res = a.softmax(1);
-
-    assert(res.rows() == 2);
-    assert(res.cols() == 2);
-
-    // each col sums to 1
-    assert(approx_eq(res(0, 0) + res(1, 0), 1.0));
-    assert(approx_eq(res(0, 1) + res(1, 1), 1.0));
-
-    // larger input → larger softmax output within same col
-    assert(res(1, 0) > res(0, 0));  // 3 > 1
-    assert(res(1, 1) > res(0, 1));  // 4 > 2
-
+    for (size_t r = 0; r < res.rows(); ++r) {
+        assert(approx_eq(res(r, 0) + res(r, 1) + res(r, 2), 1.0));
+        assert(res(r, 2) > res(r, 1));
+        assert(res(r, 1) > res(r, 0));
+    }
     std::cout << "PASS test_softmax_axis1\n";
 }
 //==============================
@@ -1631,6 +1463,40 @@ void test_approx_equal_different_shapes() {
     std::cout << "PASS test_approx_equal_different_shapes\n";
 }
 
+void test_pad_asymmetric() {
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+
+    Matrix expected(5, 6, {
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 2.0, 3.0, 0.0, 0.0,
+        0.0, 4.0, 5.0, 6.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    });
+
+    assert_matrix_eq(a.pad(1, 2, 1, 2), expected);
+    std::cout << "PASS test_pad_asymmetric\n";
+}
+
+void test_pad_zero_is_copy() {
+    Matrix a(2, 2, {1.0, 2.0,
+                    3.0, 4.0});
+
+    assert_matrix_eq(a.pad(0, 0, 0, 0), a);
+    std::cout << "PASS test_pad_zero_is_copy\n";
+}
+
+void test_pad_does_not_modify_original() {
+    Matrix a(1, 2, {7.0, 8.0});
+    Matrix original = a;
+
+    (void)a.pad(1, 1, 1, 1);
+
+    assert_matrix_eq(a, original);
+    std::cout << "PASS test_pad_does_not_modify_original\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -1744,6 +1610,9 @@ int main() {
     test_sigmoid_output_range();
     test_sigmoid_derivative();
     test_sigmoid_does_not_modify_original();
+    test_pad_asymmetric();
+    test_pad_does_not_modify_original();
+    test_pad_zero_is_copy();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }
