@@ -1463,6 +1463,40 @@ void test_approx_equal_different_shapes() {
     std::cout << "PASS test_approx_equal_different_shapes\n";
 }
 
+void test_pad_asymmetric() {
+    Matrix a(2, 3, {1.0, 2.0, 3.0,
+                    4.0, 5.0, 6.0});
+
+    Matrix expected(5, 6, {
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 2.0, 3.0, 0.0, 0.0,
+        0.0, 4.0, 5.0, 6.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    });
+
+    assert_matrix_eq(a.pad(1, 2, 1, 2), expected);
+    std::cout << "PASS test_pad_asymmetric\n";
+}
+
+void test_pad_zero_is_copy() {
+    Matrix a(2, 2, {1.0, 2.0,
+                    3.0, 4.0});
+
+    assert_matrix_eq(a.pad(0, 0, 0, 0), a);
+    std::cout << "PASS test_pad_zero_is_copy\n";
+}
+
+void test_pad_does_not_modify_original() {
+    Matrix a(1, 2, {7.0, 8.0});
+    Matrix original = a;
+
+    (void)a.pad(1, 1, 1, 1);
+
+    assert_matrix_eq(a, original);
+    std::cout << "PASS test_pad_does_not_modify_original\n";
+}
+
 int main() {
     test_construction();
     test_element_access();
@@ -1576,6 +1610,9 @@ int main() {
     test_sigmoid_output_range();
     test_sigmoid_derivative();
     test_sigmoid_does_not_modify_original();
+    test_pad_asymmetric();
+    test_pad_does_not_modify_original();
+    test_pad_zero_is_copy();
     std::cout << "\nAll tests passed.\n";
     return 0;
 }

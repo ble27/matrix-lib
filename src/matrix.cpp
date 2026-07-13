@@ -1157,9 +1157,21 @@ Matrix Matrix::normalize(int axis) const {
     return res;
 }
 
-// Matrix Matrix::pad(size_t top, size_t bottom, size_t left, size_t right) const {
+// Padding
+Matrix Matrix::pad(size_t top, size_t bottom, size_t left, size_t right) const {
+    const size_t new_rows = rows_ + top + bottom;
+    const size_t new_cols = cols_ + left + right;
 
-// }
+    Matrix res(new_rows, new_cols);
+
+    // only top and left margins shift the original coords
+    for (size_t r = 0; r < rows_; r++) {
+        for (size_t c = 0; c < cols_; c++) {
+            res(r + top, c + left) = (*this)(r, c);
+        }
+    }
+    return res;
+}
 
 //==============================
 // Output
