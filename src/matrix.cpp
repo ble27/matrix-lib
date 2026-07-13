@@ -213,6 +213,9 @@ double Matrix::dot(const Matrix& other) const {
 //==============================
 
 double Matrix::sum() const {
+    if (data_.empty())
+        throw std::runtime_error("sum is undefined for an empty matrix");
+
     double total = 0.0;
     for (size_t i = 0; i < data_.size(); i++)
         total += data_[i];
@@ -221,7 +224,7 @@ double Matrix::sum() const {
 
 Matrix Matrix::sum(int axis) const {
     if (data_.empty())
-        throw std::runtime_error("reduction is undefined for an empty matrix");
+        throw std::runtime_error("sum is undefined for an empty matrix");
 
     if (axis != 0 && axis != 1)
         throw std::runtime_error("axis must be 0 or 1");
@@ -244,12 +247,15 @@ Matrix Matrix::sum(int axis) const {
 }
 
 double Matrix::mean() const {
+    if (data_.empty())
+        throw std::runtime_error("mean is undefined for an empty matrix");
+
     return sum() / data_.size();
 }
 
 Matrix Matrix::mean(int axis) const {
     if (data_.empty())
-        throw std::runtime_error("reduction is undefined for an empty matrix");
+        throw std::runtime_error("mean is undefined for an empty matrix");
 
     if (axis != 0 && axis != 1)
         throw std::runtime_error("axis must be 0 or 1");
@@ -264,6 +270,9 @@ Matrix Matrix::mean(int axis) const {
 }
 
 double Matrix::max() const {
+    if (data_.empty())
+        throw std::runtime_error("max is undefined for an empty matrix");
+
     double cur_max = data_[0];
     for (size_t i = 1; i < data_.size(); i++)
         if (data_[i] > cur_max)
@@ -273,7 +282,7 @@ double Matrix::max() const {
 
 Matrix Matrix::max(int axis) const {
     if (data_.empty())
-        throw std::runtime_error("reduction is undefined for an empty matrix");
+        throw std::runtime_error("max is undefined for an empty matrix");
 
     if (axis != 0 && axis != 1)
         throw std::runtime_error("axis must be 0 or 1");
@@ -300,6 +309,9 @@ Matrix Matrix::max(int axis) const {
 }
 
 double Matrix::min() const {
+    if (data_.empty())
+        throw std::runtime_error("min is undefined for an empty matrix");
+
     double cur_min = data_[0];
     for (size_t i = 1; i < data_.size(); i++)
         if (data_[i] < cur_min)
@@ -309,7 +321,7 @@ double Matrix::min() const {
 
 Matrix Matrix::min(int axis) const {
     if (data_.empty())
-        throw std::runtime_error("reduction is undefined for an empty matrix");
+        throw std::runtime_error("min is undefined for an empty matrix");
 
     if (axis != 0 && axis != 1)
         throw std::runtime_error("axis must be 0 or 1");
@@ -530,6 +542,9 @@ Matrix Matrix::vstack(const Matrix& a, const Matrix& b) {
 //==============================
 
 size_t Matrix::argmax() const {
+    if (data_.empty())
+        throw std::runtime_error("argmax is undefined for an empty matrix");
+
     size_t idx = 0;
     for (size_t i = 1; i < data_.size(); i++) {
         if (data_[i] > data_[idx]) {
@@ -540,6 +555,8 @@ size_t Matrix::argmax() const {
 }   
 
 size_t Matrix::argmin() const {
+    if (data_.empty())
+        throw std::runtime_error("argmin is undefined for an empty matrix");
     size_t idx = 0;
     for (size_t i = 1; i < data_.size(); i++) {
         if (data_[i] < data_[idx]) {
@@ -830,7 +847,7 @@ Matrix Matrix::random(size_t rows, size_t cols, double low, double high) {
 }
 
 Matrix Matrix::row(size_t r) const {
-    if (r >= rows_ || r < 0) 
+    if (r >= rows_) 
         throw std::runtime_error("Invalid row dimension\n");
 
     Matrix res(1, cols_);
@@ -841,7 +858,7 @@ Matrix Matrix::row(size_t r) const {
 }
 
 Matrix Matrix::col(size_t c) const {
-    if (c >= cols_ || c < 0)
+    if (c >= cols_)
         throw std::runtime_error("Invalid column dimension\n");
 
     Matrix res(rows_, 1);
@@ -1039,6 +1056,9 @@ Matrix Matrix::diag() const {
 
 // Construct a diagonal matrix from a vector
 Matrix Matrix::diag(const Matrix& vec) {
+    if (vec.cols() != 1)
+        throw std::runtime_error("diag requires a column vector");
+
     Matrix res(vec.rows(), vec.rows());
     for (size_t i = 0; i < vec.rows(); i++) {
         res(i, i) = vec.data_[i];
@@ -1096,6 +1116,9 @@ Matrix Matrix::sigmoid_derivative() const {
 }
 
 Matrix Matrix::normalize(int axis) const {
+    if (axis != 1 && axis != 0)
+        throw std::runtime_error("axis must be 0 or 1\n");
+
     // divide each entry by the L2 normalization of the row or column based on axis
     // Column-by-column (vertically)
     Matrix res = *this;
