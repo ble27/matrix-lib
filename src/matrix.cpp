@@ -880,9 +880,22 @@ double Matrix::trace() const {
 }
 
 Matrix Matrix::broadcast_add(const Matrix& vec, int axis) const {
-    // Row-wise
+    // Add a column vector across columns
     if (axis == 0) {
-        if (vec.rows() != 1 or vec.cols() != cols_)
+        if (vec.cols() != 1 || vec.rows() != rows())
+            throw std::runtime_error("Invalid column vector dimension\n");
+
+        Matrix res = *this;
+        for (size_t r = 0; r < rows_; r++) {
+            for (size_t c = 0; c < cols_; c++) {
+                res(r, c) += vec(r, 0);
+            }
+        }
+        return res;
+    }
+    // Add a row vector across the rows
+    if (axis == 1) {
+        if (vec.rows() != 1 || vec.cols() != cols_)
             throw std::runtime_error("Invalid row vector dimension\n");
 
         Matrix res = *this;
@@ -893,18 +906,8 @@ Matrix Matrix::broadcast_add(const Matrix& vec, int axis) const {
         }
         return res;
     }
-    // Column-wise
-    if (axis == 1) {
-        if (vec.cols() != 1 or vec.rows() != rows())
-            throw std::runtime_error("Invalid column vector dimension\n");
-
-        Matrix res = *this;
-        for (size_t r = 0; r < rows_; r++) {
-            for (size_t c = 0; c < cols_; c++) {
-                res(r, c) += vec(r, 0);
-            }
-        }
-        return res;
+    else {
+        throw std::runtime_error("axis must be 0 or 1");
     }
 }
 
