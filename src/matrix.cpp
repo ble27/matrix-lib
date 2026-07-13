@@ -1157,7 +1157,10 @@ Matrix Matrix::normalize(int axis) const {
     return res;
 }
 
-// Matrix Matrix::pad(size_t top, size_t bottom, size_t left, size_t right) const {}
+// Matrix Matrix::pad(size_t top, size_t bottom, size_t left, size_t right) const {
+
+// }
+
 //==============================
 // Output
 //==============================
