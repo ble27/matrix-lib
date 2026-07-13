@@ -873,7 +873,7 @@ double Matrix::trace() const {
         throw std::runtime_error("Unable to compute the trace for non-square matrix\n");
 
     double trace = 0.0;
-    for (size_t i = 0; i < data_.size(); i++) {
+    for (size_t i = 0; i < rows_; i++) {
         trace += data_[i * cols_ + i];
     }
     return trace;
@@ -994,7 +994,7 @@ void Matrix::swap_rows(size_t r1, size_t r2) {
 
 void Matrix::swap_cols(size_t c1, size_t c2) {
     // Pass 0-based index as params
-    if (c1 >= rows_ || c2 >= rows_) 
+    if (c1 >= cols_ || c2 >= cols_) 
         throw std::runtime_error("Invalid col index\n");
     if (c1 == c2)
         return;
@@ -1018,7 +1018,7 @@ void Matrix::set_col(size_t c, const Matrix& vec) {
         throw std::runtime_error("Invalid column index\n");
     if (vec.cols_ != 1 || vec.rows_ != rows_)
         throw std::runtime_error("Vector dimension mismatch\n");
-    for (size_t r = 0; r < cols_; r++) {
+    for (size_t r = 0; r < rows_; r++) {
         data_[r * cols_ + c] = vec.data_[r];
     }
 }
